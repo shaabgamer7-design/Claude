@@ -1,0 +1,1552 @@
+<title>Watermark Eraser</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Chivo:wght@600;800&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
+<style>
+/* Layout: an editing-suite split. A dark viewer on the left holds the frame you mark up;
+   the numbered steps sit on the right and stack under the viewer on phones. */
+:root {
+  --bg: #eef0ec;
+  --surface: #fafbf8;
+  --fg: #171a17;
+  --muted: #596059;
+  --line: #d3d8d1;
+  --accent: #e8a317;
+  --on-accent: #1c1403;
+  --accent-ink: #855700;
+  --danger: #a8321f;
+  --ok: #2b6e45;
+  --stage: #1b1f1c;
+  --stage-fg: #cfd5ce;
+  --stage-muted: #8f978e;
+  --stage-line: #353b36;
+  --stage-raise: #262b27;
+  --scrim: rgba(12, 14, 12, 0.72);
+  --box: #f2b230;
+  --display: "Chivo", "Arial Narrow", system-ui, sans-serif;
+  --body: "IBM Plex Sans", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --mono: "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  --r: 10px;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #111311;
+    --surface: #191c19;
+    --fg: #e5e8e3;
+    --muted: #9aa299;
+    --line: #2c312c;
+    --accent: #f0b232;
+    --on-accent: #1c1403;
+    --accent-ink: #f0b232;
+    --danger: #f09a8a;
+    --ok: #86d0a2;
+    --stage: #0a0b0a;
+    --stage-fg: #cfd5ce;
+    --stage-muted: #8f978e;
+    --stage-line: #2c322d;
+    --stage-raise: #171a17;
+    --scrim: rgba(6, 7, 6, 0.75);
+    --box: #f2b230;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #111311;
+  --surface: #191c19;
+  --fg: #e5e8e3;
+  --muted: #9aa299;
+  --line: #2c312c;
+  --accent: #f0b232;
+  --on-accent: #1c1403;
+  --accent-ink: #f0b232;
+  --danger: #f09a8a;
+  --ok: #86d0a2;
+  --stage: #0a0b0a;
+  --stage-fg: #cfd5ce;
+  --stage-muted: #8f978e;
+  --stage-line: #2c322d;
+  --stage-raise: #171a17;
+  --scrim: rgba(6, 7, 6, 0.75);
+  --box: #f2b230;
+  color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+body {
+  background: var(--bg);
+  color: var(--fg);
+  font-family: var(--body);
+  font-size: 15px;
+  line-height: 1.5;
+}
+.app {
+  max-width: 1240px;
+  margin: 0 auto;
+  padding-inline: clamp(16px, 3vw, 32px);
+  padding-block: 24px 40px;
+  display: grid;
+  gap: 20px;
+}
+button { font: inherit; }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+/* Header */
+.top {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 12px 24px;
+}
+.top > div { min-width: 0; }
+h1 {
+  font-family: var(--display);
+  font-weight: 800;
+  font-size: clamp(28px, 3.6vw, 38px);
+  line-height: 1.05;
+  letter-spacing: -0.01em;
+  margin: 0;
+  text-wrap: balance;
+}
+.lede { margin: 8px 0 0; color: var(--muted); max-width: 62ch; }
+.chip {
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--muted);
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  padding: 4px 10px;
+  white-space: nowrap;
+}
+
+/* Workspace */
+.work {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(280px, 340px);
+  gap: 20px;
+  align-items: start;
+}
+@media (max-width: 880px) {
+  .work { grid-template-columns: minmax(0, 1fr); }
+}
+
+/* Viewer */
+.stage {
+  background: var(--stage);
+  color: var(--stage-fg);
+  border-radius: var(--r);
+  padding: 12px;
+  display: grid;
+  gap: 12px;
+  min-width: 0;
+}
+.frame {
+  position: relative;
+  display: grid;
+  place-items: center;
+  min-height: 180px;
+  border-radius: 6px;
+  overflow: hidden;
+}
+#view {
+  display: block;
+  max-width: 100%;
+  max-height: 68vh;
+  width: auto;
+  height: auto;
+  cursor: crosshair;
+  touch-action: none;
+}
+.busy #view { cursor: progress; }
+.badge {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  background: var(--scrim);
+  color: var(--stage-fg);
+  padding: 4px 8px;
+  border-radius: 4px;
+  pointer-events: none;
+}
+.drop {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  background: var(--scrim);
+  border: 2px dashed var(--box);
+  border-radius: 6px;
+  color: var(--stage-fg);
+  font-weight: 600;
+  pointer-events: none;
+}
+.bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px 14px;
+}
+.seg {
+  display: inline-flex;
+  border: 1px solid var(--stage-line);
+  border-radius: 7px;
+  padding: 2px;
+  gap: 2px;
+}
+.seg button {
+  border: 0;
+  background: transparent;
+  color: var(--stage-muted);
+  font-size: 13px;
+  font-weight: 600;
+  padding: 4px 12px;
+  border-radius: 5px;
+  cursor: pointer;
+}
+.seg button[aria-pressed="true"] { background: var(--stage-raise); color: var(--stage-fg); }
+.seg button:disabled { cursor: not-allowed; opacity: 0.5; }
+.check {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  color: var(--stage-muted);
+  cursor: pointer;
+}
+.check input { accent-color: var(--box); margin: 0; }
+.scrub {
+  flex: 1 1 200px;
+  min-width: 0;
+  accent-color: var(--box);
+}
+.tc {
+  font-family: var(--mono);
+  font-size: 13px;
+  font-variant-numeric: tabular-nums;
+  color: var(--stage-fg);
+  white-space: nowrap;
+}
+
+/* Steps */
+.steps {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 12px;
+  min-width: 0;
+}
+.step {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--r);
+  padding: 16px;
+  display: grid;
+  gap: 10px;
+  min-width: 0;
+}
+.step h2 {
+  font-family: var(--display);
+  font-weight: 600;
+  font-size: 17px;
+  line-height: 1.2;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.num {
+  flex: none;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  display: inline-grid;
+  place-items: center;
+  font-family: var(--mono);
+  font-size: 12px;
+  font-weight: 500;
+  background: var(--fg);
+  color: var(--bg);
+}
+.step p { margin: 0; color: var(--muted); font-size: 14px; }
+.row { display: flex; flex-wrap: wrap; gap: 8px; }
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 40px;
+  padding: 0 16px;
+  border-radius: 8px;
+  border: 1px solid var(--line);
+  background: var(--bg);
+  color: var(--fg);
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+}
+.btn:hover:not(:disabled) { border-color: var(--muted); }
+.btn.primary { background: var(--accent); border-color: var(--accent); color: var(--on-accent); }
+.btn.primary:hover:not(:disabled) { border-color: var(--fg); }
+.btn.small { min-height: 30px; padding: 0 10px; font-size: 13px; }
+.btn:disabled { opacity: 0.45; cursor: not-allowed; }
+.meta {
+  font-family: var(--mono);
+  font-size: 12px;
+  color: var(--muted);
+  overflow-wrap: anywhere;
+}
+.vh {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+/* Box list */
+.boxes { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; }
+.boxes li { display: flex; align-items: center; gap: 6px; min-width: 0; }
+.boxes .empty { color: var(--muted); font-size: 14px; }
+.boxrow {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  text-align: left;
+  padding: 6px 10px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--bg);
+  color: var(--fg);
+  cursor: pointer;
+}
+.boxrow[aria-pressed="true"] { border-color: var(--accent); }
+.boxrow:disabled { cursor: not-allowed; }
+.tag {
+  flex: none;
+  width: 22px;
+  height: 22px;
+  display: inline-grid;
+  place-items: center;
+  border-radius: 4px;
+  background: var(--box);
+  color: var(--on-accent);
+  font-family: var(--mono);
+  font-size: 12px;
+  font-weight: 500;
+}
+.dims { display: grid; min-width: 0; }
+.dims b { font-family: var(--mono); font-weight: 500; font-size: 13px; font-variant-numeric: tabular-nums; }
+.dims span { font-family: var(--mono); font-size: 11px; color: var(--muted); font-variant-numeric: tabular-nums; }
+.dims .warn { color: var(--danger); font-family: var(--body); font-size: 12px; }
+.x {
+  flex: none;
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  border: 1px solid var(--line);
+  background: transparent;
+  color: var(--muted);
+  font-size: 18px;
+  line-height: 1;
+  cursor: pointer;
+}
+.x:hover:not(:disabled) { color: var(--danger); border-color: var(--danger); }
+.x:disabled { opacity: 0.45; cursor: not-allowed; }
+
+/* Progress and result */
+.progress { display: grid; gap: 8px; }
+.meter { height: 8px; border-radius: 99px; background: var(--line); overflow: hidden; }
+.meter i { display: block; height: 100%; width: 0; background: var(--accent); transition: width 0.25s linear; }
+.ptext { font-family: var(--mono); font-size: 13px; font-variant-numeric: tabular-nums; }
+.result { display: grid; gap: 10px; }
+.result video {
+  width: 100%;
+  max-height: 260px;
+  background: var(--stage);
+  border-radius: 6px;
+}
+.msg { margin: 0; font-size: 14px; }
+.msg:empty { display: none; }
+.msg.error { color: var(--danger); }
+.msg.ok { color: var(--ok); }
+
+/* Notes */
+.notes {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 12px 24px;
+  border-top: 1px solid var(--line);
+  padding-top: 20px;
+}
+.notes h3 {
+  font-family: var(--mono);
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--accent-ink);
+  margin: 0 0 4px;
+}
+.notes p { margin: 0; font-size: 14px; color: var(--muted); max-width: 60ch; }
+.foot { font-size: 13px; color: var(--muted); margin: 0; }
+
+/* Keeps the source video decodable (some browsers stop decoding hidden videos) without showing it. */
+.src {
+  position: fixed;
+  left: 0;
+  bottom: 0;
+  width: 2px;
+  height: 2px;
+  opacity: 0;
+  pointer-events: none;
+}
+@media (prefers-reduced-motion: reduce) {
+  .meter i { transition: none; }
+}
+</style>
+
+<div class="app">
+  <header class="top">
+    <div>
+      <h1>Watermark Eraser</h1>
+      <p class="lede">Remove a logo or stamp that sits in one fixed spot on your video. Box it, check the result on a frame, then process the whole clip.</p>
+    </div>
+    <span class="chip">Runs on your device &middot; Nothing is uploaded</span>
+  </header>
+
+  <main class="work">
+    <section class="stage" aria-label="Video frame">
+      <div class="frame" id="frame">
+        <canvas id="view" width="1280" height="720" tabindex="0"
+          aria-label="Video frame. Drag to draw a box over the watermark. Arrow keys move the selected box, Delete removes it."></canvas>
+        <span class="badge" id="badge">Sample frame</span>
+        <div class="drop" id="drop" hidden>Drop your video to open it</div>
+      </div>
+      <div class="bar">
+        <div class="seg" role="group" aria-label="Show">
+          <button type="button" id="showAfter" aria-pressed="true">After</button>
+          <button type="button" id="showBefore" aria-pressed="false">Before</button>
+        </div>
+        <label class="check"><input type="checkbox" id="outlines" checked> Box outlines</label>
+        <input type="range" class="scrub" id="scrub" min="0" max="1000" step="1" value="0" disabled aria-label="Choose a frame">
+        <span class="tc" id="tc">--:--.-- / --:--.--</span>
+      </div>
+    </section>
+
+    <ol class="steps">
+      <li class="step">
+        <h2><span class="num">1</span> Open your video</h2>
+        <p>MP4, MOV or WebM. You can also drop the file on the frame.</p>
+        <div class="row">
+          <button type="button" class="btn" id="openBtn">Choose video</button>
+        </div>
+        <input type="file" id="file" class="vh" accept="video/*,.mp4,.mov,.m4v,.webm,.mkv" tabindex="-1" aria-hidden="true">
+        <p class="meta" id="fileMeta">No video open. The frame shows a sample with its logo already boxed.</p>
+        <p class="msg" id="openMsg" role="status"></p>
+      </li>
+
+      <li class="step">
+        <h2><span class="num">2</span> Box the watermark</h2>
+        <p>Drag on the frame to draw a box a little bigger than the logo. Drag a box to move it, or drag its corner to resize. Use one box per logo.</p>
+        <ul class="boxes" id="boxList"></ul>
+        <div class="row">
+          <button type="button" class="btn small" id="addBtn">Add a box</button>
+        </div>
+      </li>
+
+      <li class="step">
+        <h2><span class="num">3</span> Remove and save</h2>
+        <p id="runHint">Open a video first.</p>
+        <div class="row">
+          <button type="button" class="btn primary" id="runBtn" disabled>Remove watermark</button>
+        </div>
+        <div class="progress" id="progress" hidden>
+          <div class="meter" role="progressbar" aria-label="Processing" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" id="meter"><i id="meterFill"></i></div>
+          <span class="ptext" id="ptext">Starting</span>
+          <p class="msg" id="pnote" role="status"></p>
+          <div class="row"><button type="button" class="btn small" id="cancelBtn">Cancel</button></div>
+        </div>
+        <div class="result" id="result" hidden>
+          <video id="resultVideo" controls playsinline preload="metadata"></video>
+          <p class="meta" id="resultMeta"></p>
+          <div class="row"><button type="button" class="btn primary" id="saveBtn">Save video</button></div>
+          <p class="msg" id="saveMsg" role="status"></p>
+        </div>
+        <p class="msg" id="runMsg" role="status"></p>
+      </li>
+    </ol>
+  </main>
+
+  <section class="notes" aria-label="What to expect">
+    <div>
+      <h3>Works well</h3>
+      <p>A logo, channel name or date stamp that stays in one spot for the whole video, over a fairly plain area such as sky, a wall, a floor or a blurred background.</p>
+    </div>
+    <div>
+      <h3>Leaves a soft patch</h3>
+      <p>The box is filled by blending the pixels around its edges. Over faces, text or busy detail you will see a smooth smudge where the logo was. A tighter box gives a smaller patch.</p>
+    </div>
+    <div>
+      <h3>Won't work</h3>
+      <p>Watermarks that move around the frame, or one logo repeated across the whole picture. This tool only fills fixed boxes.</p>
+    </div>
+    <div>
+      <h3>Time and format</h3>
+      <p>The video plays through once while it is processed, so a 3-minute clip takes about 3 minutes. Keep the tab open. You get MP4 in Chrome, Edge and Safari, WebM in Firefox, with the sound kept.</p>
+    </div>
+  </section>
+
+  <p class="foot">Use this on videos you made or have permission to edit.</p>
+</div>
+
+<video id="src" class="src" playsinline preload="auto" aria-hidden="true"></video>
+
+<script>
+(() => {
+  'use strict';
+
+  const $ = (id) => document.getElementById(id);
+  const view = $('view');
+  const vctx = view.getContext('2d');
+  const video = $('src');
+  const work = document.createElement('canvas');
+  const wctx = work.getContext('2d', { willReadFrequently: true });
+
+  const S = {
+    mode: 'sample',      // 'sample' until a video is open, then 'video'
+    boxes: [],           // {x, y, w, h} in video pixels
+    sel: -1,
+    after: true,
+    outlines: true,
+    file: null,
+    url: null,
+    duration: 0,
+    scrubT: 0,
+    busy: false,
+    stop: null,          // resolves the running job early (cancel)
+    rec: null,
+    hiddenPause: false,
+    result: null,        // {blob, url, name}
+  };
+  const audio = { ctx: null, dest: null };
+
+  // Saving goes through the viewer's downloads capability when the page runs as an Artifact.
+  const downloadsReady = (window.claude && typeof window.claude.use === 'function')
+    ? window.claude.use('downloads').catch(() => null)
+    : Promise.resolve(null);
+
+  const MIME_TYPES = [
+    'video/mp4;codecs=avc1.640033,mp4a.40.2',
+    'video/mp4;codecs=avc1.4d0033,mp4a.40.2',
+    'video/mp4;codecs=avc1,mp4a.40.2',
+    'video/mp4;codecs=avc1',
+    'video/webm;codecs=vp9,opus',
+    'video/webm;codecs=vp8,opus',
+    'video/webm',
+    'video/mp4',
+  ];
+
+  /* ---------- Formatting ---------- */
+
+  function fmtTime(t) {
+    if (!isFinite(t) || t < 0) t = 0;
+    const cs = Math.floor(t * 100);
+    const h = Math.floor(cs / 360000);
+    const m = Math.floor(cs / 6000) % 60;
+    const s = Math.floor(cs / 100) % 60;
+    const c = cs % 100;
+    const mm = String(m).padStart(2, '0');
+    const ss = String(s).padStart(2, '0') + '.' + String(c).padStart(2, '0');
+    return (h ? h + ':' + mm : mm) + ':' + ss;
+  }
+  function fmtClock(sec) {
+    sec = Math.max(0, Math.ceil(sec));
+    const m = Math.floor(sec / 60);
+    const s = sec % 60;
+    return m + ':' + String(s).padStart(2, '0');
+  }
+  function fmtSize(bytes) {
+    if (bytes >= 1e9) return (bytes / 1e9).toFixed(2) + ' GB';
+    if (bytes >= 1e6) return (bytes / 1e6).toFixed(1) + ' MB';
+    return Math.max(1, Math.round(bytes / 1e3)) + ' KB';
+  }
+  function setMsg(el, text, kind) {
+    el.textContent = text || '';
+    el.className = 'msg' + (kind ? ' ' + kind : '');
+  }
+
+  /* ---------- Sample frame ---------- */
+
+  function roundRect(g, x, y, w, h, r) {
+    g.beginPath();
+    g.moveTo(x + r, y);
+    g.arcTo(x + w, y, x + w, y + h, r);
+    g.arcTo(x + w, y + h, x, y + h, r);
+    g.arcTo(x, y + h, x, y, r);
+    g.arcTo(x, y, x + w, y, r);
+    g.closePath();
+  }
+
+  function makeSample() {
+    const W = 1280, H = 720, horizon = 430;
+    const c = document.createElement('canvas');
+    c.width = W; c.height = H;
+    const g = c.getContext('2d');
+    let seed = 11;
+    const rnd = () => (seed = (seed * 16807) % 2147483647) / 2147483647;
+
+    const sky = g.createLinearGradient(0, 0, 0, horizon);
+    sky.addColorStop(0, '#1b2750');
+    sky.addColorStop(0.55, '#77507f');
+    sky.addColorStop(1, '#f0a062');
+    g.fillStyle = sky;
+    g.fillRect(0, 0, W, horizon);
+
+    const glow = g.createRadialGradient(820, horizon - 18, 6, 820, horizon - 18, 300);
+    glow.addColorStop(0, 'rgba(255,238,196,1)');
+    glow.addColorStop(0.09, 'rgba(255,210,145,0.95)');
+    glow.addColorStop(1, 'rgba(255,170,100,0)');
+    g.fillStyle = glow;
+    g.fillRect(0, 0, W, horizon);
+
+    g.fillStyle = '#4a3558';
+    g.beginPath();
+    g.moveTo(0, horizon);
+    for (let x = 0; x <= 640; x += 8) {
+      const fall = Math.max(0, 1 - x / 640);
+      g.lineTo(x, horizon - fall * (70 + 30 * Math.sin(x / 90) + 10 * Math.sin(x / 23 + 1)));
+    }
+    g.lineTo(640, horizon);
+    g.closePath();
+    g.fill();
+
+    const sea = g.createLinearGradient(0, horizon, 0, H);
+    sea.addColorStop(0, '#d08660');
+    sea.addColorStop(0.25, '#6a4d70');
+    sea.addColorStop(1, '#17203d');
+    g.fillStyle = sea;
+    g.fillRect(0, horizon, W, H - horizon);
+    for (let i = 0; i < 1600; i++) {
+      const y = horizon + 2 + Math.pow(rnd(), 1.5) * (H - horizon - 4);
+      const depth = (y - horizon) / (H - horizon);
+      const x = rnd() * (W + 40) - 20;
+      const len = 4 + rnd() * (10 + 60 * depth);
+      const inPath = Math.abs(x - 820) < 40 + depth * 160;
+      const a = inPath ? 0.25 + rnd() * 0.55 : 0.03 + rnd() * 0.09;
+      g.fillStyle = inPath ? 'rgba(255,215,150,' + a.toFixed(2) + ')' : 'rgba(235,225,255,' + a.toFixed(2) + ')';
+      g.fillRect(x, y, len, 1 + depth * 2.5);
+    }
+
+    // The sample watermark: a play icon and a channel name, bottom right.
+    g.save();
+    g.globalAlpha = 0.62;
+    g.fillStyle = '#ffffff';
+    g.font = '700 30px system-ui, -apple-system, "Segoe UI", Roboto, sans-serif';
+    const label = 'mychannel';
+    const tw = Math.ceil(g.measureText(label).width);
+    const iconW = 40, gap = 10, right = W - 40, mid = H - 56;
+    const x0 = right - tw - gap - iconW;
+    roundRect(g, x0, mid - 14, iconW, 28, 7);
+    g.fill();
+    g.fillStyle = '#17203d';
+    g.beginPath();
+    g.moveTo(x0 + 15, mid - 8);
+    g.lineTo(x0 + 28, mid);
+    g.lineTo(x0 + 15, mid + 8);
+    g.closePath();
+    g.fill();
+    g.fillStyle = '#ffffff';
+    g.textBaseline = 'middle';
+    g.fillText(label, x0 + iconW + gap, mid + 1);
+    g.restore();
+
+    const pad = 12;
+    return {
+      canvas: c,
+      box: { x: x0 - pad, y: mid - 17 - pad, w: right - x0 + pad * 2, h: 34 + pad * 2 },
+    };
+  }
+
+  const sample = makeSample();
+
+  /* ---------- Filling a box ---------- */
+
+  // Averages two columns (c1 nearest the box) over three rows for each row of the box edge.
+  function edgeCol(d, ew, eh, c1, c2, by, bh) {
+    const out = new Float32Array(bh * 3);
+    const both = c2 >= 0 && c2 < ew;
+    for (let j = 0; j < bh; j++) {
+      let r = 0, g = 0, b = 0, n = 0;
+      for (let dj = -1; dj <= 1; dj++) {
+        const y = by + j + dj;
+        if (y < 0 || y >= eh) continue;
+        let p = (y * ew + c1) * 4;
+        r += d[p]; g += d[p + 1]; b += d[p + 2]; n++;
+        if (both) {
+          p = (y * ew + c2) * 4;
+          r += d[p]; g += d[p + 1]; b += d[p + 2]; n++;
+        }
+      }
+      out[j * 3] = r / n; out[j * 3 + 1] = g / n; out[j * 3 + 2] = b / n;
+    }
+    return out;
+  }
+  function edgeRow(d, ew, eh, r1, r2, bx, bw) {
+    const out = new Float32Array(bw * 3);
+    const both = r2 >= 0 && r2 < eh;
+    for (let i = 0; i < bw; i++) {
+      let r = 0, g = 0, b = 0, n = 0;
+      for (let di = -1; di <= 1; di++) {
+        const x = bx + i + di;
+        if (x < 0 || x >= ew) continue;
+        let p = (r1 * ew + x) * 4;
+        r += d[p]; g += d[p + 1]; b += d[p + 2]; n++;
+        if (both) {
+          p = (r2 * ew + x) * 4;
+          r += d[p]; g += d[p + 1]; b += d[p + 2]; n++;
+        }
+      }
+      out[i * 3] = r / n; out[i * 3 + 1] = g / n; out[i * 3 + 2] = b / n;
+    }
+    return out;
+  }
+
+  let grid = new Float32Array(0);
+
+  // Replaces the box (bx, by, bw, bh) inside RGBA data d (ew x eh) with a blend of the
+  // pixels just outside it: each pixel mixes the four edges weighted by closeness, then a
+  // few smoothing passes soften the streaks that noisy edge pixels would leave.
+  function fillBox(d, ew, eh, bx, by, bw, bh) {
+    const L = bx > 0 ? edgeCol(d, ew, eh, bx - 1, bx - 2, by, bh) : null;
+    const R = bx + bw < ew ? edgeCol(d, ew, eh, bx + bw, bx + bw + 1, by, bh) : null;
+    const T = by > 0 ? edgeRow(d, ew, eh, by - 1, by - 2, bx, bw) : null;
+    const B = by + bh < eh ? edgeRow(d, ew, eh, by + bh, by + bh + 1, bx, bw) : null;
+    if (!L && !R && !T && !B) return;
+
+    const gw = bw + 2, gh = bh + 2;
+    if (grid.length < gw * gh * 3) grid = new Float32Array(gw * gh * 3);
+    const G = grid;
+    const row = gw * 3;
+
+    for (let j = 0; j < bh; j++) {
+      for (let i = 0; i < bw; i++) {
+        let ws = 0, r = 0, g = 0, b = 0, w, k;
+        if (L) { w = 1 / (i + 1); k = j * 3; r += L[k] * w; g += L[k + 1] * w; b += L[k + 2] * w; ws += w; }
+        if (R) { w = 1 / (bw - i); k = j * 3; r += R[k] * w; g += R[k + 1] * w; b += R[k + 2] * w; ws += w; }
+        if (T) { w = 1 / (j + 1); k = i * 3; r += T[k] * w; g += T[k + 1] * w; b += T[k + 2] * w; ws += w; }
+        if (B) { w = 1 / (bh - j); k = i * 3; r += B[k] * w; g += B[k + 1] * w; b += B[k + 2] * w; ws += w; }
+        const o = (j + 1) * row + (i + 1) * 3;
+        G[o] = r / ws; G[o + 1] = g / ws; G[o + 2] = b / ws;
+      }
+    }
+
+    // Ring around the box: real edge pixels where the frame has them, otherwise a copy of
+    // the neighbouring inside value so a box touching the frame edge blends outward cleanly.
+    const setRing = () => {
+      for (let j = 1; j <= bh; j++) {
+        const lo = j * row, ro = j * row + (gw - 1) * 3;
+        for (let c = 0; c < 3; c++) {
+          G[lo + c] = L ? L[(j - 1) * 3 + c] : G[lo + 3 + c];
+          G[ro + c] = R ? R[(j - 1) * 3 + c] : G[ro - 3 + c];
+        }
+      }
+      for (let i = 1; i <= bw; i++) {
+        const to = i * 3, bo = (gh - 1) * row + i * 3;
+        for (let c = 0; c < 3; c++) {
+          G[to + c] = T ? T[(i - 1) * 3 + c] : G[to + row + c];
+          G[bo + c] = B ? B[(i - 1) * 3 + c] : G[bo - row + c];
+        }
+      }
+    };
+
+    let iters = Math.min(16, Math.max(4, Math.round(Math.min(bw, bh) / 3)));
+    if (bw * bh > 120000) iters = Math.min(iters, 6);
+    for (let it = 0; it < iters; it++) {
+      setRing();
+      for (let j = 1; j <= bh; j++) {
+        let o = j * row + 3;
+        for (let i = 1; i <= bw; i++, o += 3) {
+          G[o] = (G[o - 3] + G[o + 3] + G[o - row] + G[o + row]) * 0.25;
+          G[o + 1] = (G[o - 2] + G[o + 4] + G[o + 1 - row] + G[o + 1 + row]) * 0.25;
+          G[o + 2] = (G[o - 1] + G[o + 5] + G[o + 2 - row] + G[o + 2 + row]) * 0.25;
+        }
+      }
+    }
+
+    for (let j = 0; j < bh; j++) {
+      let o = (j + 1) * row + 3;
+      let p = ((by + j) * ew + bx) * 4;
+      for (let i = 0; i < bw; i++, o += 3, p += 4) {
+        d[p] = G[o]; d[p + 1] = G[o + 1]; d[p + 2] = G[o + 2]; d[p + 3] = 255;
+      }
+    }
+  }
+
+  // Cleans every box on the view canvas. Each box reads from the canvas as it stands, so
+  // overlapping boxes build on each other instead of sampling a logo that is already gone.
+  function cleanBoxes() {
+    const W = view.width, H = view.height;
+    for (const b of S.boxes) {
+      if (b.w < 1 || b.h < 1) continue;
+      const ex = Math.max(0, b.x - 2), ey = Math.max(0, b.y - 2);
+      const ew = Math.min(W, b.x + b.w + 2) - ex, eh = Math.min(H, b.y + b.h + 2) - ey;
+      if (work.width < ew || work.height < eh) {
+        work.width = Math.max(work.width, ew);
+        work.height = Math.max(work.height, eh);
+      }
+      wctx.clearRect(0, 0, ew, eh);
+      wctx.drawImage(view, ex, ey, ew, eh, 0, 0, ew, eh);
+      const img = wctx.getImageData(0, 0, ew, eh);
+      fillBox(img.data, ew, eh, b.x - ex, b.y - ey, b.w, b.h);
+      wctx.putImageData(img, 0, 0);
+      vctx.drawImage(work, b.x - ex, b.y - ey, b.w, b.h, b.x, b.y, b.w, b.h);
+    }
+  }
+
+  /* ---------- Drawing the view ---------- */
+
+  function cssScale() {
+    const w = view.getBoundingClientRect().width;
+    return w ? view.width / w : 1;
+  }
+  function boxColor() {
+    return getComputedStyle(document.documentElement).getPropertyValue('--box').trim() || '#f2b230';
+  }
+
+  function drawOutlines() {
+    const k = cssScale();
+    const lw = Math.max(1, 2 * k);
+    const color = boxColor();
+    vctx.save();
+    S.boxes.forEach((b, i) => {
+      const sel = i === S.sel;
+      const x = b.x - lw, y = b.y - lw, w = b.w + 2 * lw, h = b.h + 2 * lw;
+      vctx.setLineDash([]);
+      vctx.lineWidth = lw * 2.5;
+      vctx.strokeStyle = 'rgba(0,0,0,0.45)';
+      vctx.strokeRect(x, y, w, h);
+      vctx.lineWidth = lw;
+      vctx.strokeStyle = color;
+      vctx.setLineDash(sel ? [] : [7 * k, 5 * k]);
+      vctx.strokeRect(x, y, w, h);
+      vctx.setLineDash([]);
+
+      const t = 18 * k;
+      const tx = x - lw / 2;
+      const ty = y - t - lw / 2 >= 0 ? y - t - lw / 2 : y + h + lw / 2;
+      vctx.fillStyle = color;
+      vctx.fillRect(tx, ty, t, t);
+      vctx.fillStyle = '#1c1403';
+      vctx.font = '500 ' + Math.round(12 * k) + 'px "IBM Plex Mono", ui-monospace, monospace';
+      vctx.textAlign = 'center';
+      vctx.textBaseline = 'middle';
+      vctx.fillText(String(i + 1), tx + t / 2, ty + t / 2 + k);
+
+      if (sel) {
+        const hs = 9 * k;
+        for (const [cx, cy] of corners(b)) {
+          vctx.fillStyle = color;
+          vctx.strokeStyle = 'rgba(0,0,0,0.6)';
+          vctx.lineWidth = k;
+          vctx.fillRect(cx - hs / 2, cy - hs / 2, hs, hs);
+          vctx.strokeRect(cx - hs / 2, cy - hs / 2, hs, hs);
+        }
+      }
+    });
+    vctx.restore();
+  }
+
+  function render() {
+    if (S.busy) return;
+    const src = S.mode === 'video' ? video : sample.canvas;
+    vctx.drawImage(src, 0, 0, view.width, view.height);
+    if (S.after) cleanBoxes();
+    if (S.outlines) drawOutlines();
+  }
+  let renderQueued = false;
+  function queueRender() {
+    if (renderQueued) return;
+    renderQueued = true;
+    requestAnimationFrame(() => { renderQueued = false; render(); });
+  }
+
+  /* ---------- Editing boxes ---------- */
+
+  function corners(b) {
+    return [[b.x, b.y], [b.x + b.w, b.y], [b.x, b.y + b.h], [b.x + b.w, b.y + b.h]];
+  }
+  function toVideo(e) {
+    const r = view.getBoundingClientRect();
+    const x = (e.clientX - r.left) * view.width / r.width;
+    const y = (e.clientY - r.top) * view.height / r.height;
+    return {
+      x: Math.round(Math.min(view.width, Math.max(0, x))),
+      y: Math.round(Math.min(view.height, Math.max(0, y))),
+    };
+  }
+  function hitTest(p) {
+    const reach = 12 * cssScale();
+    const order = S.boxes.map((_, i) => i).sort((a, b) => (b === S.sel) - (a === S.sel));
+    for (const i of order) {
+      const cs = corners(S.boxes[i]);
+      for (let c = 0; c < 4; c++) {
+        if (Math.abs(p.x - cs[c][0]) <= reach && Math.abs(p.y - cs[c][1]) <= reach) {
+          return { type: 'corner', i, anchor: cs[3 - c], corner: c };
+        }
+      }
+    }
+    for (const i of order) {
+      const b = S.boxes[i];
+      if (p.x >= b.x && p.x <= b.x + b.w && p.y >= b.y && p.y <= b.y + b.h) return { type: 'inside', i };
+    }
+    return { type: 'none' };
+  }
+
+  let drag = null;
+  view.addEventListener('pointerdown', (e) => {
+    if (S.busy || e.button > 0) return;
+    const p = toVideo(e);
+    const hit = hitTest(p);
+    if (hit.type === 'corner') {
+      drag = { type: 'resize', i: hit.i, ax: hit.anchor[0], ay: hit.anchor[1] };
+    } else if (hit.type === 'inside') {
+      const b = S.boxes[hit.i];
+      drag = { type: 'move', i: hit.i, dx: p.x - b.x, dy: p.y - b.y };
+    } else {
+      S.boxes.push({ x: p.x, y: p.y, w: 0, h: 0 });
+      drag = { type: 'resize', i: S.boxes.length - 1, ax: p.x, ay: p.y, fresh: true };
+    }
+    S.sel = drag.i;
+    view.setPointerCapture(e.pointerId);
+    view.focus({ preventScroll: true });
+    e.preventDefault();
+    updateList();
+    queueRender();
+  });
+  view.addEventListener('pointermove', (e) => {
+    const p = toVideo(e);
+    if (!drag) {
+      if (S.busy) return;
+      const hit = hitTest(p);
+      view.style.cursor = hit.type === 'corner'
+        ? (hit.corner === 0 || hit.corner === 3 ? 'nwse-resize' : 'nesw-resize')
+        : hit.type === 'inside' ? 'move' : 'crosshair';
+      return;
+    }
+    const b = S.boxes[drag.i];
+    if (drag.type === 'resize') {
+      b.x = Math.min(drag.ax, p.x);
+      b.y = Math.min(drag.ay, p.y);
+      b.w = Math.abs(p.x - drag.ax);
+      b.h = Math.abs(p.y - drag.ay);
+    } else {
+      b.x = Math.min(view.width - b.w, Math.max(0, p.x - drag.dx));
+      b.y = Math.min(view.height - b.h, Math.max(0, p.y - drag.dy));
+    }
+    updateList();
+    queueRender();
+  });
+  const endDrag = () => {
+    if (!drag) return;
+    const b = S.boxes[drag.i];
+    if (b && (b.w < 4 || b.h < 4)) {
+      // A click (or a sliver) is not a box.
+      S.boxes.splice(drag.i, 1);
+      S.sel = drag.fresh ? -1 : Math.min(S.sel, S.boxes.length - 1);
+    }
+    drag = null;
+    updateList();
+    queueRender();
+  };
+  view.addEventListener('pointerup', endDrag);
+  view.addEventListener('pointercancel', endDrag);
+
+  view.addEventListener('keydown', (e) => {
+    if (S.busy || S.sel < 0) return;
+    const b = S.boxes[S.sel];
+    const step = e.shiftKey ? 10 : 1;
+    switch (e.key) {
+      case 'ArrowLeft': b.x = Math.max(0, b.x - step); break;
+      case 'ArrowRight': b.x = Math.min(view.width - b.w, b.x + step); break;
+      case 'ArrowUp': b.y = Math.max(0, b.y - step); break;
+      case 'ArrowDown': b.y = Math.min(view.height - b.h, b.y + step); break;
+      case 'Delete':
+      case 'Backspace': removeBox(S.sel); return e.preventDefault();
+      default: return;
+    }
+    e.preventDefault();
+    updateList();
+    queueRender();
+  });
+
+  function removeBox(i) {
+    S.boxes.splice(i, 1);
+    S.sel = S.boxes.length ? Math.min(i, S.boxes.length - 1) : -1;
+    updateList();
+    queueRender();
+  }
+
+  $('addBtn').addEventListener('click', () => {
+    const w = Math.max(40, Math.round(view.width * 0.18));
+    const h = Math.max(24, Math.round(view.height * 0.08));
+    S.boxes.push({ x: Math.round((view.width - w) / 2), y: Math.round((view.height - h) / 2), w, h });
+    S.sel = S.boxes.length - 1;
+    updateList();
+    queueRender();
+    view.focus({ preventScroll: true });
+  });
+
+  function updateList() {
+    const ul = $('boxList');
+    ul.textContent = '';
+    if (!S.boxes.length) {
+      const li = document.createElement('li');
+      li.className = 'empty';
+      li.textContent = 'No boxes yet. Drag on the frame to draw one.';
+      ul.appendChild(li);
+    }
+    S.boxes.forEach((b, i) => {
+      const li = document.createElement('li');
+      const row = document.createElement('button');
+      row.type = 'button';
+      row.className = 'boxrow';
+      row.disabled = S.busy;
+      row.setAttribute('aria-pressed', String(i === S.sel));
+      const tag = document.createElement('span');
+      tag.className = 'tag';
+      tag.textContent = String(i + 1);
+      const dims = document.createElement('span');
+      dims.className = 'dims';
+      const size = document.createElement('b');
+      size.textContent = b.w + ' × ' + b.h + ' px';
+      const pos = document.createElement('span');
+      pos.textContent = 'at ' + b.x + ', ' + b.y;
+      dims.append(size, pos);
+      const full = b.x <= 0 && b.y <= 0 && b.x + b.w >= view.width && b.y + b.h >= view.height;
+      if (full) {
+        const warn = document.createElement('span');
+        warn.className = 'warn';
+        warn.textContent = 'Covers the whole frame. Leave some picture around it.';
+        dims.appendChild(warn);
+      }
+      row.append(tag, dims);
+      row.addEventListener('click', () => { S.sel = i; updateList(); queueRender(); });
+      const x = document.createElement('button');
+      x.type = 'button';
+      x.className = 'x';
+      x.disabled = S.busy;
+      x.setAttribute('aria-label', 'Remove box ' + (i + 1));
+      x.textContent = '×';
+      x.addEventListener('click', () => removeBox(i));
+      li.append(row, x);
+      ul.appendChild(li);
+    });
+    updateRunState();
+  }
+
+  function updateRunState() {
+    const ready = S.mode === 'video' && S.boxes.length > 0;
+    $('runBtn').disabled = !ready || S.busy;
+    $('runHint').textContent = S.mode !== 'video'
+      ? 'Open a video first. The sample frame is only for trying the boxes.'
+      : !S.boxes.length
+        ? 'Draw at least one box over the watermark.'
+        : 'Processing plays your video through once, so it takes about ' + fmtClock(S.duration) + '. Keep this tab open and visible.';
+  }
+
+  /* ---------- View controls ---------- */
+
+  function setAfter(on) {
+    S.after = on;
+    $('showAfter').setAttribute('aria-pressed', String(on));
+    $('showBefore').setAttribute('aria-pressed', String(!on));
+    queueRender();
+  }
+  $('showAfter').addEventListener('click', () => setAfter(true));
+  $('showBefore').addEventListener('click', () => setAfter(false));
+  $('outlines').addEventListener('change', (e) => { S.outlines = e.target.checked; queueRender(); });
+  window.addEventListener('resize', queueRender);
+
+  /* ---------- Opening a video ---------- */
+
+  function once(target, events) {
+    return new Promise((resolve) => {
+      const handler = (e) => {
+        events.forEach((n) => target.removeEventListener(n, handler));
+        resolve(e);
+      };
+      events.forEach((n) => target.addEventListener(n, handler));
+    });
+  }
+
+  function seekTo(t) {
+    if (Math.abs(video.currentTime - t) < 0.001 && video.readyState >= 2) return Promise.resolve();
+    const done = once(video, ['seeked', 'error']);
+    video.currentTime = t;
+    return done;
+  }
+
+  let seekTarget = null, seeking = false;
+  async function requestSeek(t) {
+    seekTarget = t;
+    if (seeking) return;
+    seeking = true;
+    while (seekTarget !== null) {
+      const next = seekTarget;
+      seekTarget = null;
+      await seekTo(next);
+      render();
+    }
+    seeking = false;
+  }
+
+  function showTime(t) {
+    $('tc').textContent = S.mode === 'video' ? fmtTime(t) + ' / ' + fmtTime(S.duration) : '--:--.-- / --:--.--';
+  }
+
+  $('scrub').addEventListener('input', (e) => {
+    if (S.mode !== 'video' || S.busy) return;
+    S.scrubT = (Number(e.target.value) / 1000) * S.duration;
+    showTime(S.scrubT);
+    requestSeek(S.scrubT);
+  });
+
+  $('openBtn').addEventListener('click', () => $('file').click());
+  $('file').addEventListener('change', (e) => {
+    const f = e.target.files && e.target.files[0];
+    e.target.value = '';
+    if (f) openFile(f);
+  });
+
+  const frame = $('frame');
+  let dragDepth = 0;
+  frame.addEventListener('dragenter', (e) => { e.preventDefault(); dragDepth++; if (!S.busy) $('drop').hidden = false; });
+  frame.addEventListener('dragover', (e) => { e.preventDefault(); });
+  frame.addEventListener('dragleave', () => { dragDepth = Math.max(0, dragDepth - 1); if (!dragDepth) $('drop').hidden = true; });
+  frame.addEventListener('drop', (e) => {
+    e.preventDefault();
+    dragDepth = 0;
+    $('drop').hidden = true;
+    const f = e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files[0];
+    if (f && !S.busy) openFile(f);
+  });
+
+  async function openFile(file) {
+    const openMsg = $('openMsg');
+    setMsg(openMsg, '');
+    const looksLikeVideo = (file.type || '').startsWith('video/') || /\.(mp4|m4v|mov|webm|mkv|ogv)$/i.test(file.name);
+    if (!looksLikeVideo) {
+      setMsg(openMsg, 'That file is not a video. Choose an MP4, MOV or WebM file.', 'error');
+      return;
+    }
+    const prevUrl = S.url;
+    const url = URL.createObjectURL(file);
+    $('fileMeta').textContent = 'Opening ' + file.name + '…';
+
+    video.muted = false;
+    video.src = url;
+    video.load();
+    const ev = await once(video, ['loadedmetadata', 'error']);
+    if (ev.type === 'error' || !video.videoWidth) {
+      URL.revokeObjectURL(url);
+      if (prevUrl) { video.src = prevUrl; video.load(); }
+      $('fileMeta').textContent = S.file ? describeFile() : 'No video open.';
+      setMsg(openMsg, 'This browser can’t play ' + file.name + '. Try an MP4 file, or open this page in Chrome or Edge, which read the most formats.', 'error');
+      return;
+    }
+    // Files recorded in a browser often leave out their length; asking for a far-off
+    // moment makes the browser work it out.
+    if (!isFinite(video.duration)) {
+      const found = once(video, ['durationchange', 'seeked']);
+      video.currentTime = 1e9;
+      await found;
+    }
+    if (prevUrl) URL.revokeObjectURL(prevUrl);
+    clearResult();
+
+    S.url = url;
+    S.file = file;
+    S.mode = 'video';
+    S.duration = isFinite(video.duration) ? video.duration : 0;
+    S.boxes = [];
+    S.sel = -1;
+    view.width = video.videoWidth;
+    view.height = video.videoHeight;
+    $('badge').hidden = true;
+    $('scrub').disabled = false;
+    $('fileMeta').textContent = describeFile();
+    S.scrubT = Math.min(S.duration * 0.1, 3);
+    $('scrub').value = S.duration ? String(Math.round((S.scrubT / S.duration) * 1000)) : '0';
+    showTime(S.scrubT);
+    updateList();
+    await seekTo(S.scrubT);
+    render();
+    view.focus({ preventScroll: true });
+  }
+
+  function describeFile() {
+    return S.file.name + ' · ' + view.width + '×' + view.height + ' · ' + fmtTime(S.duration) + ' · ' + fmtSize(S.file.size);
+  }
+
+  /* ---------- Processing ---------- */
+
+  function pickMime() {
+    if (!window.MediaRecorder || !view.captureStream) return null;
+    return MIME_TYPES.find((t) => { try { return MediaRecorder.isTypeSupported(t); } catch (e) { return false; } }) || null;
+  }
+
+  // Roughly matches the source file's bitrate, within sensible limits for its resolution.
+  function pickBitrate() {
+    const mp = (view.width * view.height) / 1e6;
+    const cap = Math.min(25, Math.max(3, 3 + 2.6 * mp)) * 1e6;
+    const src = S.duration > 0 ? (S.file.size * 8) / S.duration : cap;
+    return Math.round(Math.min(cap, Math.max(2.5e6, src * 1.15)));
+  }
+
+  function audioTracks() {
+    try {
+      if (!audio.ctx) {
+        const Ctx = window.AudioContext || window.webkitAudioContext;
+        const ctx = new Ctx();
+        const node = ctx.createMediaElementSource(video);
+        const dest = ctx.createMediaStreamDestination();
+        node.connect(dest);
+        audio.ctx = ctx;
+        audio.dest = dest;
+      }
+      audio.ctx.resume();
+      return audio.dest.stream.getAudioTracks();
+    } catch (e) {
+      return [];
+    }
+  }
+
+  function drawCleanFrame() {
+    vctx.drawImage(video, 0, 0, view.width, view.height);
+    cleanBoxes();
+  }
+
+  function setProgress(t) {
+    const d = S.duration;
+    const pct = d ? Math.min(100, (t / d) * 100) : 0;
+    $('meterFill').style.width = pct.toFixed(1) + '%';
+    $('meter').setAttribute('aria-valuenow', String(Math.round(pct)));
+    $('scrub').value = String(Math.round(pct * 10));
+    showTime(t);
+    $('ptext').textContent = d
+      ? 'Processing ' + fmtClock(Math.floor(t)) + ' of ' + fmtClock(d) + ' · about ' + fmtClock(d - t) + ' left'
+      : 'Processing ' + fmtClock(Math.floor(t));
+  }
+
+  function setBusy(on) {
+    S.busy = on;
+    document.body.classList.toggle('busy', on);
+    ['openBtn', 'addBtn', 'showAfter', 'showBefore', 'outlines'].forEach((id) => { $(id).disabled = on; });
+    $('scrub').disabled = on || S.mode !== 'video';
+    $('runBtn').hidden = on;
+    $('progress').hidden = !on;
+    if (on) view.style.cursor = '';
+    updateList();
+  }
+
+  $('runBtn').addEventListener('click', run);
+  $('cancelBtn').addEventListener('click', () => { if (S.stop) S.stop('cancel'); });
+
+  async function run() {
+    if (S.busy || S.mode !== 'video' || !S.boxes.length) return;
+    const runMsg = $('runMsg');
+    setMsg(runMsg, '');
+    const mimeType = pickMime();
+    if (!mimeType) {
+      setMsg(runMsg, 'This browser can’t record video. Use a recent Chrome, Edge, Firefox or Safari.', 'error');
+      return;
+    }
+    clearResult();
+    const tracks = audioTracks();
+    setBusy(true);
+    setMsg($('pnote'), '');
+    setProgress(0);
+
+    video.pause();
+    await seekTo(0);
+    drawCleanFrame();
+
+    const videoTrack = view.captureStream().getVideoTracks()[0];
+    let rec;
+    try {
+      rec = new MediaRecorder(new MediaStream([videoTrack].concat(tracks)), {
+        mimeType,
+        videoBitsPerSecond: pickBitrate(),
+        audioBitsPerSecond: 160000,
+      });
+    } catch (e) {
+      videoTrack.stop();
+      setBusy(false);
+      setMsg(runMsg, 'Recording could not start in this browser. Try Chrome or Edge.', 'error');
+      render();
+      return;
+    }
+    const chunks = [];
+    rec.ondataavailable = (e) => { if (e.data && e.data.size) chunks.push(e.data); };
+    const stopped = once(rec, ['stop']);
+    S.rec = rec;
+
+    let watchdog = 0;
+    const outcome = await new Promise((resolve) => {
+      S.stop = resolve;
+      video.addEventListener('ended', () => resolve('done'), { once: true });
+      video.addEventListener('error', () => resolve('error'), { once: true });
+      rec.addEventListener('error', () => resolve('error'), { once: true });
+
+      // Draw once per decoded video frame. If the browser stops reporting frames (some do
+      // for a video that isn't on screen), fall back to drawing once per screen refresh.
+      let loop = typeof video.requestVideoFrameCallback === 'function' ? 'frame' : 'refresh';
+      let last = performance.now();
+      const tick = (kind) => () => {
+        if (!S.busy || kind !== loop) return;
+        last = performance.now();
+        drawCleanFrame();
+        setProgress(video.currentTime);
+        schedule();
+      };
+      const schedule = () => {
+        if (loop === 'frame') video.requestVideoFrameCallback(tick('frame'));
+        else requestAnimationFrame(tick('refresh'));
+      };
+      watchdog = setInterval(() => {
+        if (loop === 'frame' && !video.paused && performance.now() - last > 500) {
+          loop = 'refresh';
+          schedule();
+        }
+      }, 250);
+      schedule();
+
+      rec.start(1000);
+      video.play().catch(() => resolve('blocked'));
+    });
+    S.stop = null;
+    clearInterval(watchdog);
+
+    video.pause();
+    if (outcome === 'done') {
+      drawCleanFrame();
+      await new Promise((r) => setTimeout(r, 150));
+    }
+    if (rec.state !== 'inactive') rec.stop();
+    await stopped;
+    videoTrack.stop();
+    S.rec = null;
+    S.hiddenPause = false;
+    setBusy(false);
+
+    if (outcome === 'done' && chunks.length) {
+      const type = (rec.mimeType || mimeType).split(';')[0];
+      let blob = new Blob(chunks, { type });
+      if (type === 'video/webm') blob = (await fixWebmDuration(blob, S.duration * 1000)) || blob;
+      showResult(blob, type === 'video/webm' ? 'webm' : 'mp4');
+    } else if (outcome === 'cancel') {
+      setMsg(runMsg, 'Cancelled. Nothing was saved.');
+    } else if (outcome === 'blocked') {
+      setMsg(runMsg, 'The browser blocked playback. Click Remove watermark again.', 'error');
+    } else {
+      setMsg(runMsg, 'Something went wrong while processing. Try again, or try Chrome or Edge.', 'error');
+    }
+    await seekTo(S.scrubT);
+    showTime(S.scrubT);
+    $('scrub').value = S.duration ? String(Math.round((S.scrubT / S.duration) * 1000)) : '0';
+    render();
+  }
+
+  // Background tabs stop drawing frames, so processing pauses until the tab is visible again.
+  document.addEventListener('visibilitychange', () => {
+    const rec = S.rec;
+    if (!S.busy || !rec) return;
+    if (document.hidden) {
+      if (!video.paused) {
+        S.hiddenPause = true;
+        video.pause();
+        if (rec.state === 'recording') rec.pause();
+        setMsg($('pnote'), 'Paused while this tab was hidden.');
+      }
+    } else if (S.hiddenPause) {
+      S.hiddenPause = false;
+      if (rec.state === 'paused') rec.resume();
+      video.play().catch(() => {});
+      setMsg($('pnote'), '');
+    }
+  });
+  video.addEventListener('waiting', () => { if (S.rec && S.rec.state === 'recording') S.rec.pause(); });
+  video.addEventListener('playing', () => { if (S.rec && S.rec.state === 'paused' && !S.hiddenPause) S.rec.resume(); });
+
+  /* ---------- Result ---------- */
+
+  function clearResult() {
+    if (S.result) URL.revokeObjectURL(S.result.url);
+    S.result = null;
+    $('result').hidden = true;
+    $('resultVideo').removeAttribute('src');
+    $('resultVideo').load();
+    setMsg($('saveMsg'), '');
+  }
+
+  function showResult(blob, ext) {
+    const base = S.file.name.replace(/\.[^.]+$/, '') || 'video';
+    const name = base + '-no-watermark.' + ext;
+    const url = URL.createObjectURL(blob);
+    S.result = { blob, url, name };
+    $('resultVideo').src = url;
+    $('resultMeta').textContent = name + ' · ' + fmtSize(blob.size);
+    $('result').hidden = false;
+    setMsg($('runMsg'), 'Done. Play the result to check it, then save it.', 'ok');
+  }
+
+  $('saveBtn').addEventListener('click', async () => {
+    const r = S.result;
+    if (!r) return;
+    const note = $('saveMsg');
+    const downloads = await downloadsReady;
+    if (downloads) {
+      try {
+        await downloads.save({ filename: r.name, data: r.blob });
+        setMsg(note, 'Saved as ' + r.name + '.', 'ok');
+      } catch (e) {
+        const code = e && e.code;
+        if (code === 'declined') setMsg(note, 'Not saved. Click Save video to try again.');
+        else if (code === 'rate_limited') setMsg(note, 'A save prompt is already open.');
+        else if (code === 'too_large') setMsg(note, 'This file is too large to save here. Open the page in a desktop browser and try again.', 'error');
+        else setMsg(note, 'Saving isn’t available in this view.', 'error');
+      }
+      return;
+    }
+    const a = document.createElement('a');
+    a.href = r.url;
+    a.download = r.name;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    setMsg(note, window.claude
+      ? 'If no download started, this view blocks downloads. Open the page from its link in a browser.'
+      : 'Saved to your downloads as ' + r.name + '.');
+  });
+
+  /* ---------- WebM length fix ---------- */
+
+  // Browser-recorded WebM files have no stored length, so players can't show a timeline or
+  // seek. This writes a Duration into the file's Info header. Returns null if it can't.
+  async function fixWebmDuration(blob, durationMs) {
+    try {
+      if (!(durationMs > 0)) return null;
+      const head = new Uint8Array(await blob.slice(0, 65536).arrayBuffer());
+      const readId = (p) => {
+        const f = head[p];
+        let len = 1, mask = 0x80;
+        while (len <= 4 && !(f & mask)) { mask >>= 1; len++; }
+        if (len > 4) return null;
+        let id = 0;
+        for (let i = 0; i < len; i++) id = id * 256 + head[p + i];
+        return { id, len };
+      };
+      const readSize = (p) => {
+        const f = head[p];
+        let len = 1, mask = 0x80;
+        while (len <= 8 && !(f & mask)) { mask >>= 1; len++; }
+        if (len > 8) return null;
+        let value = f & (mask - 1);
+        let unknown = value === mask - 1;
+        for (let i = 1; i < len; i++) {
+          value = value * 256 + head[p + i];
+          if (head[p + i] !== 0xff) unknown = false;
+        }
+        return { value, len, unknown };
+      };
+      const writeSize = (value, minLen) => {
+        let len = minLen;
+        while (value >= Math.pow(2, 7 * len) - 1) len++;
+        const out = new Uint8Array(len);
+        let v = value;
+        for (let i = len - 1; i >= 0; i--) { out[i] = v % 256; v = Math.floor(v / 256); }
+        out[0] |= 0x80 >> (len - 1);
+        return out;
+      };
+
+      const ebml = readId(0);
+      if (!ebml || ebml.id !== 0x1a45dfa3) return null;
+      const ebmlSize = readSize(ebml.len);
+      let p = ebml.len + ebmlSize.len + ebmlSize.value;
+      const seg = readId(p);
+      if (!seg || seg.id !== 0x18538067) return null;
+      const segSizeAt = p + seg.len;
+      const segSize = readSize(segSizeAt);
+      p = segSizeAt + segSize.len;
+
+      while (p < head.length - 12) {
+        const el = readId(p);
+        if (!el) return null;
+        const size = readSize(p + el.len);
+        if (!size) return null;
+        const dataAt = p + el.len + size.len;
+        if (el.id === 0x114d9b74) return null; // SeekHead: inserting bytes would break its offsets
+        if (el.id === 0x1549a966) {
+          if (size.unknown || dataAt + size.value > head.length) return null;
+          const end = dataAt + size.value;
+          let q = dataAt, scale = 1e6;
+          while (q < end) {
+            const c = readId(q);
+            const cs = readSize(q + c.len);
+            const cd = q + c.len + cs.len;
+            if (c.id === 0x4489) return null; // already has a duration
+            if (c.id === 0x2ad7b1) {
+              scale = 0;
+              for (let i = 0; i < cs.value; i++) scale = scale * 256 + head[cd + i];
+            }
+            q = cd + cs.value;
+          }
+          const dur = new Uint8Array(11);
+          dur[0] = 0x44; dur[1] = 0x89; dur[2] = 0x88;
+          new DataView(dur.buffer).setFloat64(3, (durationMs * 1e6) / (scale || 1e6));
+          const infoSize = writeSize(size.value + 11, size.len);
+          const grow = 11 + infoSize.length - size.len;
+          const segField = segSize.unknown
+            ? head.slice(segSizeAt, segSizeAt + segSize.len)
+            : writeSize(segSize.value + grow, segSize.len);
+          return new Blob([
+            head.slice(0, segSizeAt),
+            segField,
+            head.slice(segSizeAt + segSize.len, p + el.len),
+            infoSize,
+            head.slice(dataAt, end),
+            dur,
+            blob.slice(end),
+          ], { type: blob.type });
+        }
+        if (size.unknown) return null;
+        p = dataAt + size.value;
+      }
+      return null;
+    } catch (e) {
+      return null;
+    }
+  }
+
+  /* ---------- Start ---------- */
+
+  S.boxes = [sample.box];
+  S.sel = 0;
+  updateList();
+  showTime(0);
+  render();
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(queueRender);
+})();
+</script>
