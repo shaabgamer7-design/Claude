@@ -1,0 +1,265 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Avatar Studio</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%237c5cff'/%3E%3Ccircle cx='16' cy='13' r='6' fill='white'/%3E%3Cpath d='M6 28c1.5-6 5.5-9 10-9s8.5 3 10 9' fill='white'/%3E%3C/svg%3E">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="shell">
+  <aside class="sidebar">
+    <div class="brand">
+      <div class="brand-mark"><svg viewBox="0 0 32 32"><circle cx="16" cy="13" r="6"/><path d="M6 28c1.5-6 5.5-9 10-9s8.5 3 10 9"/></svg></div>
+      <div><div class="brand-name">Avatar Studio</div><div class="brand-sub">Local · Free · Unlimited</div></div>
+    </div>
+    <nav>
+      <button class="nav-item active" data-view="create"><svg viewBox="0 0 24 24"><path d="M15 10l4.55-2.28A1 1 0 0 1 21 8.62v6.76a1 1 0 0 1-1.45.9L15 14M4 6h9a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2z"/></svg>Create video</button>
+      <button class="nav-item" data-view="avatars"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21c1-4.5 4-7 8-7s7 2.5 8 7"/></svg>Avatars</button>
+      <button class="nav-item" data-view="library"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>Library</button>
+      <button class="nav-item" data-view="settings"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg>Settings<span class="dot hidden" id="settings-dot"></span></button>
+    </nav>
+    <div class="queue" id="queue"></div>
+  </aside>
+
+  <main>
+    <!-- ================= CREATE ================= -->
+    <section class="view active" id="view-create">
+      <header class="view-head">
+        <div><h1>Create a video</h1><p class="muted">Pick an avatar, write what it says, choose a voice and a look.</p></div>
+      </header>
+      <div id="setup-banner" class="banner hidden"></div>
+
+      <div class="create-grid">
+        <div class="create-main">
+          <div class="card step">
+            <div class="step-head"><span class="step-num">1</span><h2>Avatar</h2></div>
+            <div class="avatar-strip" id="avatar-strip"></div>
+          </div>
+
+          <div class="card step">
+            <div class="step-head"><span class="step-num">2</span><h2>Script</h2></div>
+            <div class="row gap">
+              <input id="topic" class="grow" placeholder="Topic, e.g. 3 free AI tools that replace paid apps">
+              <select id="hook-style" title="Hook style">
+                <option value="question">Question hook</option>
+                <option value="bold claim">Bold claim</option>
+                <option value="surprising fact">Surprising fact</option>
+                <option value="story">Mini story</option>
+                <option value="mistake callout">"Stop doing this"</option>
+              </select>
+            </div>
+            <div class="row gap wrap mt8">
+              <button class="btn" id="btn-ai-write"><svg viewBox="0 0 24 24"><path d="M12 3l1.9 4.6L18.5 9l-4.6 1.9L12 15.5l-1.9-4.6L5.5 9l4.6-1.4z"/><path d="M19 15l.9 2.1L22 18l-2.1.9L19 21l-.9-2.1L16 18l2.1-.9z"/></svg>Write with local AI</button>
+              <button class="btn ghost" id="btn-copy-prompt"><svg viewBox="0 0 24 24"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>Copy prompt for Claude</button>
+            </div>
+            <textarea id="script" rows="5" class="mt12" placeholder="What your avatar says… (about 35 words = 15 seconds)"></textarea>
+            <div class="meter"><div class="meter-bar"><span id="script-meter"></span></div><span id="script-stats" class="muted small">0 words · ~0 s</span></div>
+          </div>
+
+          <div class="card step">
+            <div class="step-head"><span class="step-num">3</span><h2>Voice</h2></div>
+            <div class="seg" id="voice-mode">
+              <button data-v="tts" class="on">Neural voice</button>
+              <button data-v="clone">Cloned voice</button>
+              <button data-v="upload">My recording</button>
+            </div>
+            <div class="voice-pane" data-pane="tts">
+              <div class="row gap wrap">
+                <select id="tts-voice" class="grow"></select>
+                <button class="btn ghost" id="btn-preview"><svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>Preview</button>
+              </div>
+              <div class="sliders">
+                <label>Speed <input type="range" id="tts-rate" min="-30" max="30" value="0"><output id="tts-rate-v">0%</output></label>
+                <label>Pitch <input type="range" id="tts-pitch" min="-20" max="20" value="0"><output id="tts-pitch-v">0 Hz</output></label>
+              </div>
+              <p class="hint">Microsoft neural voices through edge-tts: free with no key, but they need internet. Includes Urdu (Asad, Uzma), Hindi, Arabic and English.</p>
+            </div>
+            <div class="voice-pane hidden" data-pane="clone">
+              <div class="row gap wrap">
+                <select id="clone-lang">
+                  <option value="en">English</option><option value="hi">Hindi</option><option value="ar">Arabic</option>
+                  <option value="tr">Turkish</option><option value="fr">French</option><option value="es">Spanish</option><option value="de">German</option>
+                </select>
+              </div>
+              <p class="hint" id="clone-hint">Speaks the script in the avatar's own voice sample. Runs fully offline with Chatterbox (MIT licence).</p>
+            </div>
+            <div class="voice-pane hidden" data-pane="upload">
+              <div class="row gap wrap">
+                <label class="btn ghost file-btn"><svg viewBox="0 0 24 24"><path d="M12 16V4M6 10l6-6 6 6M4 20h16"/></svg>Upload audio<input type="file" id="audio-file" accept="audio/*,video/*" hidden></label>
+                <button class="btn ghost" id="btn-record"><span class="rec-dot"></span><span id="rec-label">Record</span></button>
+                <audio id="audio-preview" controls class="hidden"></audio>
+              </div>
+              <p class="hint">Best choice for Urdu: nothing sounds more like you than you. The script box is used only for captions.</p>
+            </div>
+            <div class="toggles">
+              <label class="toggle"><input type="checkbox" id="convert-voice"><span></span>Make it sound like my avatar <em class="muted small">(voice conversion)</em></label>
+              <label class="toggle"><input type="checkbox" id="studio-audio" checked><span></span>Studio audio mastering</label>
+            </div>
+          </div>
+
+          <div class="card step">
+            <div class="step-head"><span class="step-num">4</span><h2>Look</h2></div>
+            <div class="label">Format</div>
+            <div class="tiles" id="aspect">
+              <button data-v="9:16" class="on"><i style="aspect-ratio:9/16"></i>9:16<small>Reels · Shorts</small></button>
+              <button data-v="4:5"><i style="aspect-ratio:4/5"></i>4:5<small>Feed</small></button>
+              <button data-v="1:1"><i style="aspect-ratio:1/1"></i>1:1<small>Square</small></button>
+              <button data-v="16:9"><i style="aspect-ratio:16/9"></i>16:9<small>YouTube</small></button>
+              <button data-v="original"><i style="aspect-ratio:3/4;border-style:dashed"></i>Original<small>As recorded</small></button>
+            </div>
+            <div class="label mt12">Captions</div>
+            <div class="seg" id="captions">
+              <button data-v="pop" class="on">Pop highlight</button>
+              <button data-v="clean">Clean</button>
+              <button data-v="none">None</button>
+            </div>
+            <div class="label mt12">Quality</div>
+            <div class="seg" id="quality">
+              <button data-v="studio" class="on">Studio <small>HD mouth restore</small></button>
+              <button data-v="fast">Fast <small>draft</small></button>
+            </div>
+            <div class="toggles">
+              <label class="toggle"><input type="checkbox" id="film-finish" checked><span></span>Film finish <em class="muted small">(sharpen + fine grain, hides the "AI look")</em></label>
+            </div>
+          </div>
+        </div>
+
+        <div class="create-side">
+          <div class="card sticky">
+            <div class="preview-frame" id="preview-frame">
+              <div class="preview-empty" id="preview-empty">Your video appears here</div>
+              <video id="result-video" controls playsinline class="hidden"></video>
+            </div>
+            <div class="render-box">
+              <div class="est" id="estimate">Pick an avatar to start</div>
+              <button class="btn primary big" id="btn-render" disabled><svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>Render video</button>
+              <div class="progress hidden" id="render-progress">
+                <div class="progress-top"><span id="rp-stage">Starting…</span><span id="rp-pct">0%</span></div>
+                <div class="bar"><span id="rp-bar"></span></div>
+                <div class="muted small" id="rp-time"></div>
+              </div>
+              <a class="btn big hidden" id="btn-download" download><svg viewBox="0 0 24 24"><path d="M12 4v12M6 10l6 6 6-6M4 20h16"/></svg>Download MP4</a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================= AVATARS ================= -->
+    <section class="view" id="view-avatars">
+      <header class="view-head">
+        <div><h1>Avatars</h1><p class="muted">Each avatar is a face, a voice and a personality you can reuse forever.</p></div>
+        <button class="btn primary" id="btn-new-avatar"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>New avatar</button>
+      </header>
+      <div class="avatar-grid" id="avatar-grid"></div>
+    </section>
+
+    <!-- ================= LIBRARY ================= -->
+    <section class="view" id="view-library">
+      <header class="view-head">
+        <div><h1>Library</h1><p class="muted">Everything you've rendered, stored on this computer.</p></div>
+      </header>
+      <div class="video-grid" id="video-grid"></div>
+    </section>
+
+    <!-- ================= SETTINGS ================= -->
+    <section class="view" id="view-settings">
+      <header class="view-head">
+        <div><h1>Settings</h1><p class="muted">Models, engines and limits.</p></div>
+      </header>
+      <div class="settings-grid">
+        <div class="card">
+          <h2>AI models</h2>
+          <p class="muted small">Downloaded once (about 480 MB), then everything runs offline on your CPU.</p>
+          <div id="model-list" class="list"></div>
+          <button class="btn primary mt12" id="btn-download-models">Download models</button>
+          <div class="progress hidden mt12" id="dl-progress">
+            <div class="progress-top"><span id="dl-stage"></span><span id="dl-pct"></span></div>
+            <div class="bar"><span id="dl-bar"></span></div>
+          </div>
+        </div>
+        <div class="card">
+          <h2>Engines</h2>
+          <div id="engine-list" class="list"></div>
+        </div>
+        <div class="card">
+          <h2>Limits &amp; performance</h2>
+          <label class="field">Max video length (seconds)<input type="number" id="set-max" min="3" max="60"></label>
+          <label class="field">CPU threads (0 = all)<input type="number" id="set-threads" min="0" max="64"></label>
+          <label class="field">Local AI model (Ollama)<input id="set-ollama-model" placeholder="qwen2.5:3b"></label>
+          <label class="field">Ollama address<input id="set-ollama-url" placeholder="http://localhost:11434"></label>
+          <button class="btn mt12" id="btn-save-settings">Save</button>
+        </div>
+        <div class="card tips">
+          <h2>For the best results</h2>
+          <ul>
+            <li><b>Face video:</b> 10–20 s, facing the camera, even light on the face, mouth mostly closed or softly talking, small natural head movement. Record in the format you post (vertical for Reels).</li>
+            <li><b>Photo avatar:</b> sharp, front-facing, mouth closed, face at least 300 px tall. AI portraits work well.</li>
+            <li><b>Voice sample:</b> 15–30 s of clean speech in a quiet room, no music.</li>
+            <li><b>Script:</b> about 2.4 words per second, so 35 words for 15 s. Short sentences sync best.</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+  </main>
+</div>
+
+<!-- ================= AVATAR EDITOR ================= -->
+<div class="modal hidden" id="avatar-modal">
+  <div class="modal-card">
+    <header class="modal-head">
+      <h2 id="am-title">New avatar</h2>
+      <button class="icon-btn" data-close><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
+    </header>
+    <div class="modal-body">
+      <div class="am-grid">
+        <div>
+          <div class="label">Face</div>
+          <label class="drop" id="face-drop">
+            <input type="file" id="am-face" accept="image/*,video/*" hidden>
+            <img id="am-face-img" class="hidden" alt="">
+            <video id="am-face-vid" class="hidden" muted loop autoplay playsinline></video>
+            <div class="drop-text" id="face-drop-text"><svg viewBox="0 0 24 24"><path d="M12 16V4M6 10l6-6 6 6M4 20h16"/></svg><b>Drop a video or photo</b><span>A 10–20 s selfie video looks the most natural</span></div>
+          </label>
+          <div class="label mt12">Voice sample <span class="muted small">(optional, for cloning)</span></div>
+          <div class="row gap wrap">
+            <label class="btn ghost file-btn"><svg viewBox="0 0 24 24"><path d="M12 16V4M6 10l6-6 6 6M4 20h16"/></svg>Upload<input type="file" id="am-voice" accept="audio/*,video/*" hidden></label>
+            <button class="btn ghost" id="am-record"><span class="rec-dot"></span><span id="am-rec-label">Record 20 s</span></button>
+          </div>
+          <audio id="am-voice-preview" controls class="hidden mt8"></audio>
+        </div>
+        <div class="am-fields">
+          <label class="field">Name<input id="am-name" placeholder="e.g. Nova"></label>
+          <label class="field">Tagline<input id="am-tagline" placeholder="Your daily AI shortcut in 15 seconds"></label>
+          <div class="row gap">
+            <label class="field grow">Niche<input id="am-niche" placeholder="AI tools, productivity"></label>
+            <label class="field grow">Language<input id="am-language" placeholder="English / Urdu / Roman Urdu"></label>
+          </div>
+          <label class="field">Tone<input id="am-tone" placeholder="Energetic, witty, confident"></label>
+          <div class="chips" id="tone-chips"></div>
+          <label class="field">Personality &amp; behaviour<textarea id="am-personality" rows="3" placeholder="Talks like a smart friend. Uses simple words, one joke max, never salesy. Always gives one practical takeaway."></textarea></label>
+          <label class="field">Audience<input id="am-audience" placeholder="Students and freelancers in Pakistan"></label>
+          <div class="row gap">
+            <label class="field grow">Catchphrases<input id="am-catchphrases" placeholder="Let's go! · Save this one."></label>
+            <label class="field grow">Call to action<input id="am-cta" placeholder="Follow for part 2"></label>
+          </div>
+          <div class="row gap">
+            <label class="field grow">Default voice<select id="am-tts-voice"></select></label>
+          </div>
+        </div>
+      </div>
+    </div>
+    <footer class="modal-foot">
+      <span class="muted small" id="am-note"></span>
+      <button class="btn ghost" data-close>Cancel</button>
+      <button class="btn primary" id="am-save">Create avatar</button>
+    </footer>
+  </div>
+</div>
+
+<div class="toast hidden" id="toast"></div>
+<script src="app.js"></script>
+</body>
+</html>

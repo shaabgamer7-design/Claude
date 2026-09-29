@@ -1,0 +1,12 @@
+# Avatar Studio - core (CPU only, no PyTorch needed)
+fastapi>=0.110
+uvicorn>=0.29
+python-multipart>=0.0.9
+numpy>=1.24,<3
+opencv-python-headless>=4.8,<5
+onnxruntime>=1.17
+librosa>=0.10
+scipy>=1.10
+imageio-ffmpeg>=0.5
+edge-tts>=6.1.10
+pillow>=10

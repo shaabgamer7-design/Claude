@@ -1,0 +1,8 @@
+venv/
+venv-voice/
+data/
+models/
+__pycache__/
+*.pyc
+*.part
+voice_test.mp3
