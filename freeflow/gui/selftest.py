@@ -89,9 +89,11 @@ def run(report_path: str) -> int:
 
     def keyboard():
         from pynput import keyboard as kb
+        from pynput import mouse
 
         kb.Controller()
-        return kb.Listener.__module__
+        mouse.Controller()
+        return f"{kb.Listener.__module__}, {mouse.Listener.__module__}"
 
     def clipboard():
         import pyperclip
@@ -174,7 +176,7 @@ def run(report_path: str) -> int:
     emit(f"FreeFlow selftest on {platform.platform()} (Python {sys.version.split()[0]})")
     check("numpy", numpy_check)
     check("audio (PortAudio)", portaudio)
-    check("keyboard hooks (pynput)", keyboard)
+    check("keyboard and mouse hooks (pynput)", keyboard)
     check("clipboard", clipboard)
     check("Claude client", claude)
     check("HTTPS", tls)

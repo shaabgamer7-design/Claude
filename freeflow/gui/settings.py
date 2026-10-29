@@ -157,9 +157,9 @@ class SettingsWindow(QWidget):
     # Pages ----------------------------------------------------------------
 
     def _general(self) -> QWidget:
-        page, layout = _page("General", "Hold the dictation key in any app and speak. "
-                             "Double-tap it for hands-free mode; tap again to finish. "
-                             "Press Esc to cancel.")
+        page, layout = _page("General", "Hold the left mouse button in any text box, speak, "
+                             "and let go: the text is written there. Or hold the dictation "
+                             "key. Press Esc to cancel.")
         form = QFormLayout()
         self.dictate_key = ChoiceCombo(choices.DICTATE_KEYS, editable=True)
         self.command_key = ChoiceCombo(choices.COMMAND_KEYS, editable=True)
@@ -180,6 +180,8 @@ class SettingsWindow(QWidget):
         form2.addRow("Microphone", self.microphone)
         form2.addRow("Insert text by", self.output_method)
         layout.addLayout(form2)
+        self.mouse_hold = QCheckBox("Hold the left mouse button in a text box to dictate "
+                                    "(release to insert the text)")
         self.overlay = QCheckBox("Show the recording bar while dictating")
         self.sounds = QCheckBox("Play start and stop sounds")
         self.trailing_space = QCheckBox("Add a space after each dictation")
@@ -187,7 +189,8 @@ class SettingsWindow(QWidget):
         self.keep_mic = QCheckBox("Keep the microphone ready (never clips your first word; "
                                   "the mic indicator stays on)")
         self.save_history = QCheckBox("Save dictation history on this computer")
-        for box in (self.overlay, self.sounds, self.trailing_space, self.launch_at_login,
+        for box in (self.mouse_hold, self.overlay, self.sounds, self.trailing_space,
+                    self.launch_at_login,
                     self.keep_mic, self.save_history):
             layout.addWidget(box)
         layout.addStretch()
@@ -461,6 +464,7 @@ class SettingsWindow(QWidget):
         self.dictate_key.set_value(h.dictate)
         self.command_key.set_value(h.command)
         self.paste_key.set_value(h.paste_last)
+        self.mouse_hold.setChecked(h.mouse_hold)
         self.microphone.set_value(cfg.audio.device)
         self.output_method.set_value(cfg.output.method)
         self.overlay.setChecked(cfg.ui.overlay)
@@ -501,6 +505,7 @@ class SettingsWindow(QWidget):
         cfg.hotkeys.dictate = self.dictate_key.value() or cfg.hotkeys.dictate
         cfg.hotkeys.command = self.command_key.value()
         cfg.hotkeys.paste_last = self.paste_key.value()
+        cfg.hotkeys.mouse_hold = self.mouse_hold.isChecked()
         cfg.audio.device = self.microphone.value()
         cfg.output.method = self.output_method.value()
         cfg.ui.overlay = self.overlay.isChecked()

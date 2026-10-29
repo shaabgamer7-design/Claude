@@ -10,7 +10,7 @@ from concurrent.futures import ThreadPoolExecutor
 from dataclasses import dataclass, field
 from typing import Callable
 
-from freeflow import audio
+from freeflow import audio, mouse
 from freeflow.audio import Recorder, Recording
 from freeflow.cleanup import CleanupError, Polisher
 from freeflow.config import Config, app_dir
@@ -18,7 +18,7 @@ from freeflow.context import AppContext, active_app
 from freeflow.history import History
 from freeflow.hotkeys import HotkeyListener, HotkeyStateMachine
 from freeflow.output import Output
-from freeflow.transcribe import Transcriber, vocabulary_prompt
+from freeflow.transcribe import Transcriber, TranscriberError, vocabulary_prompt
 
 log = logging.getLogger(__name__)
 
@@ -115,6 +115,7 @@ class App:
             self._on_action, cfg.hotkeys.tap_max_seconds, cfg.hotkeys.double_tap_window
         )
         self.listener = HotkeyListener(cfg.hotkeys, self.machine, self._on_paste_last)
+        self.mouse = mouse.from_config(cfg.hotkeys, self.machine)
         self._actions: queue.Queue = queue.Queue()
         self._worker = ThreadPoolExecutor(max_workers=1, thread_name_prefix="freeflow-process")
         self._control = threading.Thread(target=self._control_loop, daemon=True,
@@ -130,12 +131,19 @@ class App:
         self.recorder.warm_up()
         self._control.start()
         self.listener.start()
+        if self.mouse:
+            self.mouse.start()
+        self.status("ready", self.how_to())
+
+    def how_to(self) -> str:
         h = self.cfg.hotkeys
-        self.status("ready", f"hold [{h.dictate}] to dictate, double-tap for hands-free, "
-                             f"[{h.command}] for commands")
+        mouse_hint = "hold the left mouse button in a text box, or " if self.mouse else ""
+        return f"{mouse_hint}hold [{h.dictate}] to dictate"
 
     def stop(self) -> None:
         self.listener.stop()
+        if self.mouse:
+            self.mouse.stop()
         self._actions.put((None, {}))
         self._worker.shutdown(wait=False, cancel_futures=True)
         self.recorder.close()
@@ -149,6 +157,8 @@ class App:
         if value:
             self.machine.cancel()
         self.listener.enabled = not value
+        if self.mouse:
+            self.mouse.enabled = not value
         self.status("paused" if value else "idle", "dictation paused" if value else "resumed")
 
     @property
@@ -251,6 +261,11 @@ class App:
             outcome = self.pipeline.run(rec, session.mode, session.context, selection)
         except CleanupError as e:
             self.status("error", str(e))
+            self._sound("error")
+            return
+        except TranscriberError as e:
+            self._save_failed_audio(rec)
+            self.status("error", f"Speech recognition failed: {e}")
             self._sound("error")
             return
         except Exception as e:

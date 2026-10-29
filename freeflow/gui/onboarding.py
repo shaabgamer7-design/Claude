@@ -301,7 +301,7 @@ class TryPage(QWizardPage):
         self.status = hint("Starting...")
         layout.addWidget(self.status)
         self.box = QPlainTextEdit()
-        self.box.setPlaceholderText("Click here, then hold the key and say: \"Hi team, um, the "
+        self.box.setPlaceholderText("Hold the mouse button here and say: \"Hi team, um, the "
                                     "meeting is at three, no wait, four o'clock.\"")
         layout.addWidget(self.box)
 
@@ -309,13 +309,15 @@ class TryPage(QWizardPage):
         cfg = self._wizard.result_config()
         key = choices.label_for(choices.DICTATE_KEYS, cfg.hotkeys.dictate)
         self.instructions.setText(
-            f"Click in the box below, <b>hold {key}</b>, speak, and let go.<br>"
-            f"Double-tap {key} for hands-free; tap again to finish."
+            "<b>Press and hold the left mouse button</b> in the box below, wait for the "
+            "beep, speak, and let go. The text is written where you clicked.<br>"
+            f"You can also hold <b>{key}</b> instead of the mouse button."
         )
         self._wizard.apply(cfg)
 
     def on_status(self, state: str, message: str) -> None:
-        text = {"loading": message, "ready": "Ready! " + (message if "key" in message else ""),
+        text = {"loading": message + " You can already try it; the text appears when it's done.",
+                "ready": message if message.startswith("Speech model ready") else "Ready! Try it.",
                 "error": f"Problem: {message}"}.get(state, message)
         if text:
             self.status.setText(text)

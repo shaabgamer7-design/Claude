@@ -50,7 +50,7 @@ class Controller:
         self.qapp = qapp
         self.cfg = cfg
         self.engine = Engine()
-        self.overlay = FlowBar(self.engine.level, self.engine.session)
+        self.overlay = FlowBar(self.engine.level, self.engine.session, self.engine.loading_detail)
         self.overlay.enabled = cfg.ui.overlay
         self.settings = None
         self.wizard = None
@@ -99,7 +99,10 @@ class Controller:
         from freeflow.gui import choices
 
         key = choices.label_for(choices.DICTATE_KEYS, self.cfg.hotkeys.dictate)
-        self.key_action.setText(f"Hold {key} to dictate")
+        if self.cfg.hotkeys.mouse_hold:
+            self.key_action.setText(f"Hold the left mouse button in a text box, or {key}")
+        else:
+            self.key_action.setText(f"Hold {key} to dictate")
 
     # Status -----------------------------------------------------------------
 
@@ -119,6 +122,8 @@ class Controller:
         self.tray.setToolTip(f"FreeFlow - {label}"[:120])
         if state == "error" and message and not (self.wizard and self.wizard.isVisible()):
             self.tray.showMessage("FreeFlow", message[:200], self._tray_icon("error"), 5000)
+        if state == "ready" and message.startswith("Speech model ready"):
+            self.tray.showMessage("FreeFlow is ready", message[:200], self._tray_icon("idle"), 6000)
         if self.wizard is not None:
             self.wizard.try_page.on_status(state, message)
 
@@ -148,6 +153,8 @@ class Controller:
         from freeflow.gui.onboarding import SetupWizard
         from freeflow.gui.settings import bring_to_front
 
+        if self.wizard is not None:
+            self.wizard.deleteLater()  # delete the old one here, on the UI thread
         self.wizard = SetupWizard(self.cfg, permissions_only=start_at_permissions)
         self.wizard.apply_requested.connect(lambda cfg: self.engine.start(cfg))
         self.wizard.finished_setup.connect(self._wizard_done)
@@ -163,7 +170,7 @@ class Controller:
 
     def _wizard_done(self, cfg: Config) -> None:
         self.apply_config(cfg)
-        self.tray.showMessage("FreeFlow is ready", self.key_action.text(),
+        self.tray.showMessage("FreeFlow is running", self.key_action.text(),
                               self._tray_icon("idle"), 4000)
 
     def relaunch(self) -> None:
@@ -199,6 +206,21 @@ class Controller:
         self.engine.stop()
         self.tray.hide()
         self.qapp.quit()
+
+
+def _collect_garbage_on_ui_thread(qapp) -> None:
+    """Python's cycle collector runs on whichever thread happens to allocate,
+    and PySide crashes deleting Qt objects it frees off the UI thread (seen with
+    PySide6 6.12). Reference counting still frees almost everything at once;
+    only reference cycles wait for this timer."""
+    import gc
+
+    from PySide6.QtCore import QTimer
+
+    gc.disable()
+    timer = QTimer(qapp, interval=15_000)
+    timer.timeout.connect(gc.collect)
+    timer.start()
 
 
 def _single_instance(qapp, on_message):
@@ -244,6 +266,7 @@ def main(argv: list[str] | None = None) -> int:
     qapp.setOrganizationName("FreeFlow")
     qapp.setWindowIcon(app_icon())
     qapp.setQuitOnLastWindowClosed(False)
+    _collect_garbage_on_ui_thread(qapp)
 
     holder: dict = {}
     server = _single_instance(qapp, lambda: holder["c"].show_settings())

@@ -144,8 +144,10 @@ def _windows() -> AppContext:
     import ctypes
     from ctypes import wintypes
 
-    user32 = ctypes.windll.user32
-    kernel32 = ctypes.windll.kernel32
+    # Private library handles, so these signatures don't leak into the shared
+    # ctypes.windll objects other libraries use.
+    user32 = ctypes.WinDLL("user32")
+    kernel32 = ctypes.WinDLL("kernel32")
     # Pointer-sized return values must not be truncated to a 32-bit int.
     user32.GetForegroundWindow.restype = wintypes.HWND
     kernel32.OpenProcess.restype = wintypes.HANDLE

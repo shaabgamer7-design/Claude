@@ -47,9 +47,14 @@ clock if you don't see it). Click the icon to open Settings.
 
 ## Using it
 
-| Action | Keys |
+**Hold the left mouse button in any text box, wait for the beep, speak, and
+let go.** The text is written where you clicked. A normal click still just
+clicks, and dragging (to select text or move a window) never starts a
+recording.
+
+| Action | How |
 | --- | --- |
-| Dictate | hold **Right Ctrl**, speak, let go |
+| Dictate | hold the **left mouse button** in a text box, or hold **Right Ctrl** |
 | Hands-free | double-tap **Right Ctrl**, then tap once to finish |
 | Cancel | **Esc** |
 | Command mode | hold **Right Ctrl + Shift** |
@@ -57,6 +62,10 @@ clock if you don't see it). Click the icon to open Settings.
 
 - A small bar near the bottom of the screen shows a live waveform while you
   talk and dots while it's working.
+- The first time, the speech model downloads in the background. You can
+  dictate straight away: the bar shows the download progress, and your text
+  appears as soon as the model is ready.
+- To turn the mouse button off, untick it in **Settings → General**.
 - **Command mode:** select text, hold the command keys and say "make this more
   formal", "translate to Spanish" or "turn this into bullet points". With
   nothing selected it writes what you ask for: "draft a polite no to this

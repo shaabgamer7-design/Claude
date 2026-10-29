@@ -1,3 +1,4 @@
+import gc
 import os
 import plistlib
 import time
@@ -12,6 +13,7 @@ from PySide6.QtWidgets import QApplication  # noqa: E402
 from freeflow import apikeys, autostart, config  # noqa: E402
 from freeflow.app import Session  # noqa: E402
 from freeflow.config import Config, StyleRule  # noqa: E402
+from freeflow.mouse import MouseTrigger  # noqa: E402
 
 
 @pytest.fixture(scope="module")
@@ -26,6 +28,26 @@ def home(tmp_path, monkeypatch):
     for name in apikeys.KEY_LABELS:
         monkeypatch.delenv(name, raising=False)
     return tmp_path
+
+
+@pytest.fixture(autouse=True)
+def collect_windows_on_main_thread(qapp):
+    """Free each test's windows here. Left for the cycle collector, they can be
+    freed on whichever thread allocates next (an engine worker), and PySide
+    crashes deleting widgets off the main thread."""
+    yield
+    gc.collect()
+    qapp.processEvents()
+
+
+@pytest.fixture
+def no_input_hooks(monkeypatch):
+    """The global keyboard/mouse hooks need a real desktop; stub them here."""
+    from freeflow.hotkeys import HotkeyListener
+
+    for cls in (HotkeyListener, MouseTrigger):
+        monkeypatch.setattr(cls, "start", lambda self: None)
+        monkeypatch.setattr(cls, "stop", lambda self: None)
 
 
 def _wait(qapp, predicate, timeout=5.0):
@@ -143,12 +165,8 @@ def test_flow_bar_states(qapp):
     assert bar.mode == "message"
 
 
-def test_engine_boots_and_restarts(qapp, home, monkeypatch):
+def test_engine_boots_and_restarts(qapp, home, no_input_hooks):
     from freeflow.gui.engine import Engine
-    from freeflow.hotkeys import HotkeyListener
-
-    monkeypatch.setattr(HotkeyListener, "start", lambda self: None)  # no display here
-    monkeypatch.setattr(HotkeyListener, "stop", lambda self: None)
     cfg = Config()
     cfg.transcription.provider = "custom"
     cfg.transcription.base_url = "http://127.0.0.1:9/v1"
@@ -167,10 +185,11 @@ def test_engine_boots_and_restarts(qapp, home, monkeypatch):
     assert _wait(qapp, lambda: engine.app is not None and engine.app.cfg is cfg2)
     assert engine.app.pipeline.transcriber is first_stt  # speech model reused
     engine.stop()
+    engine.join()
     assert engine.app is None
 
 
-def test_engine_reports_errors(qapp, home):
+def test_engine_reports_errors(qapp, home, no_input_hooks):
     from freeflow.gui.engine import Engine
 
     cfg = Config()
@@ -181,14 +200,42 @@ def test_engine_reports_errors(qapp, home):
     engine.start(cfg)
     assert _wait(qapp, lambda: bool(errors))
     assert "groq" in errors[0].lower()
+    engine.stop()
+    engine.join()  # free the engine here, not on its worker thread
 
 
-def test_controller_tray_and_settings(qapp, home, monkeypatch):
+def test_engine_announces_slow_model_load(qapp, home, no_input_hooks, monkeypatch):
+    from freeflow import transcribe
+    from freeflow.gui.engine import Engine
+
+    class SlowModel:
+        name = "slow"
+
+        def transcribe(self, audio, prompt=""):
+            return ""
+
+    def slow_create(cfg):
+        time.sleep(1.5)  # e.g. a first-run model download
+        return SlowModel()
+
+    monkeypatch.setattr(transcribe, "create", slow_create)
+    cfg = Config()
+    cfg.cleanup.provider = "none"
+    engine = Engine()
+    seen = []
+    engine.status.connect(lambda s, m: seen.append((s, m)))
+    engine.start(cfg)
+    assert _wait(qapp, lambda: engine.app is not None)
+    assert engine.loading_detail()  # the recording bar can show progress
+    assert _wait(qapp, lambda: any(m.startswith("Speech model ready") for _, m in seen))
+    assert ("loading", "Loading the speech model...") in seen
+    assert engine.loading_detail() == ""
+    engine.stop()
+    engine.join()
+
+
+def test_controller_tray_and_settings(qapp, home, no_input_hooks):
     from freeflow.gui.main import Controller
-    from freeflow.hotkeys import HotkeyListener
-
-    monkeypatch.setattr(HotkeyListener, "start", lambda self: None)
-    monkeypatch.setattr(HotkeyListener, "stop", lambda self: None)
     cfg = Config()
     cfg.ui.onboarded = True
     cfg.transcription.provider = "custom"
@@ -210,6 +257,7 @@ def test_controller_tray_and_settings(qapp, home, monkeypatch):
     assert not controller.engine.paused  # a settings change resumes dictation
     assert config.load().dictionary == ["FreeFlow"]
     controller.engine.stop()
+    controller.engine.join()
 
 
 def test_autostart_files(home, monkeypatch, tmp_path):

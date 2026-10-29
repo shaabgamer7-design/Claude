@@ -93,6 +93,7 @@ class HotkeyStateMachine:
     HANDS_FREE_ARMING = "hands_free_arming"  # second tap still held
     HANDS_FREE = "hands_free"
     WAIT_RELEASE = "wait_release"  # finished; ignore keys until released
+    EXTERNAL = "external"  # started by another trigger (mouse hold); keys ignored
 
     def __init__(
         self,
@@ -116,8 +117,19 @@ class HotkeyStateMachine:
     @property
     def recording(self) -> bool:
         return self.state in (
-            self.HOLDING, self.TAP_PENDING, self.HANDS_FREE_ARMING, self.HANDS_FREE
+            self.HOLDING, self.TAP_PENDING, self.HANDS_FREE_ARMING, self.HANDS_FREE,
+            self.EXTERNAL,
         )
+
+    def begin(self) -> bool:
+        """Start a recording from outside the keyboard; finish() or cancel() ends it."""
+        with self._lock:
+            if self.state != self.IDLE:
+                return False
+            self.state = self.EXTERNAL
+            self.command = False
+            self._emit("start", command=False)
+            return True
 
     def update(self, now: float, dictate_active: bool, command_active: bool) -> None:
         with self._lock:

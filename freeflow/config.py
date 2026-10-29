@@ -49,6 +49,10 @@ class HotkeyConfig:
     # A press shorter than this counts as a tap (for double-tap detection).
     tap_max_seconds: float = 0.3
     double_tap_window: float = 0.4
+    # Hold the left mouse button in a text box to dictate; release to insert.
+    mouse_hold: bool = True
+    mouse_hold_seconds: float = 0.4  # shorter presses are ordinary clicks
+    mouse_text_only: bool = True  # only where the pointer is a text cursor (Windows)
 
 
 @dataclass
@@ -249,6 +253,9 @@ paste_last = "{paste_last}"  # re-paste the last result ("" disables)
 cancel = "esc"
 tap_max_seconds = 0.3
 double_tap_window = 0.4
+mouse_hold = true            # hold the left mouse button in a text box to dictate
+mouse_hold_seconds = 0.4     # shorter presses are ordinary clicks
+mouse_text_only = true       # only over text boxes (Windows)
 
 [audio]
 device = ""                 # see `freeflow devices`; empty = system default

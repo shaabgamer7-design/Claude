@@ -25,7 +25,7 @@ HEIGHT = 38
 
 
 class FlowBar(QWidget):
-    def __init__(self, level_source, session_source):
+    def __init__(self, level_source, session_source, detail_source=lambda: ""):
         super().__init__(
             None,
             Qt.FramelessWindowHint | Qt.WindowStaysOnTopHint | Qt.Tool
@@ -37,6 +37,7 @@ class FlowBar(QWidget):
         self.setFocusPolicy(Qt.NoFocus)
         self._level = level_source
         self._session = session_source
+        self._detail = detail_source  # e.g. model download progress while processing
         self.mode = "hidden"  # hidden | recording | processing | message
         self.text = ""
         self.enabled = True
@@ -92,10 +93,13 @@ class FlowBar(QWidget):
     def _width(self) -> int:
         if self.mode == "message":
             return min(520, QFontMetrics(self._font).horizontalAdvance(self.text) + 40)
+        if self.mode == "processing":
+            detail = self._detail()
+            return 92 + QFontMetrics(self._font).horizontalAdvance(detail) + 12 if detail else 92
         session = self._session()
         label = self._label(session)
         extra = QFontMetrics(self._font).horizontalAdvance(label) + 12 if label else 0
-        return 150 + extra if self.mode == "recording" else 92
+        return 150 + extra
 
     def _label(self, session) -> str:
         if self.mode != "recording" or session is None:
@@ -139,8 +143,8 @@ class FlowBar(QWidget):
             level = self._level()
             # Speech RMS is roughly 0.01-0.2; map it onto 0..1 perceptually.
             self._levels.append(min(1.0, math.sqrt(level * 12)))
-            if self.width() != self._width():
-                self._place()
+        if self.mode in ("recording", "processing") and self.width() != self._width():
+            self._place()
         self.update()
 
     def paintEvent(self, _event) -> None:
@@ -190,13 +194,19 @@ class FlowBar(QWidget):
         t = time.monotonic() - self._t0
         p.setPen(Qt.NoPen)
         cy = rect.center().y()
+        detail = self._detail()
+        x0 = rect.left() + 28 if detail else rect.center().x() - 18
         for i in range(3):
             phase = (math.sin(t * 7 - i * 0.9) + 1) / 2
             c = QColor(PROCESSING)
             c.setAlphaF(0.35 + 0.65 * phase)
             p.setBrush(c)
             r = 3.5 + 1.5 * phase
-            p.drawEllipse(QRectF(rect.center().x() - 18 + i * 18 - r, cy - r, 2 * r, 2 * r))
+            p.drawEllipse(QRectF(x0 + i * 18 - r, cy - r, 2 * r, 2 * r))
+        if detail:
+            p.setPen(QColor("white"))
+            p.drawText(QRectF(x0 + 52, rect.top(), rect.right() - x0 - 60, rect.height()),
+                       Qt.AlignVCenter | Qt.AlignLeft, detail)
 
 
 def _short(message: str) -> str:

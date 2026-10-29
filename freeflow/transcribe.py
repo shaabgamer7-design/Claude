@@ -4,7 +4,8 @@ from __future__ import annotations
 
 import logging
 import os
-from typing import Protocol
+import threading
+from typing import Callable, Protocol
 
 from freeflow.audio import Recording
 from freeflow.config import TranscriptionConfig
@@ -156,6 +157,55 @@ class HTTPTranscriber:
         if resp.status_code != 200:
             raise TranscriberError(f"{self.name} returned {resp.status_code}: {resp.text[:300]}")
         return str(resp.json().get("text", "")).strip()
+
+
+class BackgroundTranscriber:
+    """Loads a transcriber on a thread so dictation can start right away.
+
+    A dictation made before the model is ready waits for it, so nothing spoken
+    during a first-run model download is lost.
+    """
+
+    def __init__(self, factory: Callable[[], Transcriber],
+                 on_wait: Callable[[], None] | None = None):
+        self.name = "loading"
+        self.model_name = ""
+        self._stt: Transcriber | None = None
+        self._error: Exception | None = None
+        self._ready = threading.Event()
+        self._on_wait = on_wait
+        threading.Thread(target=self._load, args=(factory,), daemon=True,
+                         name="freeflow-model-load").start()
+
+    def _load(self, factory: Callable[[], Transcriber]) -> None:
+        try:
+            self._stt = factory()
+            self.name = self._stt.name
+            self.model_name = getattr(self._stt, "model_name", "")
+        except Exception as e:
+            log.exception("speech model failed to load")
+            self._error = e
+        finally:
+            self._ready.set()
+
+    @property
+    def ready(self) -> bool:
+        return self._ready.is_set()
+
+    @property
+    def error(self) -> Exception | None:
+        return self._error
+
+    def wait(self, timeout: float | None = None) -> bool:
+        return self._ready.wait(timeout)
+
+    def transcribe(self, audio: Recording, prompt: str = "") -> str:
+        if not self.ready and self._on_wait:
+            self._on_wait()
+        self._ready.wait()
+        if self._error is not None:
+            raise TranscriberError(str(self._error)) from self._error
+        return self._stt.transcribe(audio, prompt)
 
 
 def create(cfg: TranscriptionConfig) -> Transcriber:
