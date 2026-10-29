@@ -94,43 +94,50 @@ def active_app() -> AppContext:
 
 
 def _mac() -> AppContext:
+    # The Accessibility API answers live from any thread. NSWorkspace only
+    # updates while a main run loop is spinning, so it's the fallback.
+    pid, title = _mac_focused()
     try:
-        from AppKit import NSWorkspace
+        from AppKit import NSRunningApplication, NSWorkspace
 
-        app = NSWorkspace.sharedWorkspace().frontmostApplication()
-        name = str(app.localizedName() or "")
-        bundle = str(app.bundleIdentifier() or "")
+        if pid:
+            app = NSRunningApplication.runningApplicationWithProcessIdentifier_(pid)
+        else:
+            app = NSWorkspace.sharedWorkspace().frontmostApplication()
+        name = str(app.localizedName() or "") if app else ""
+        bundle = str(app.bundleIdentifier() or "") if app else ""
     except ImportError:
         name = _run(["osascript", "-e",
                      'tell application "System Events" to get name of first '
                      'application process whose frontmost is true'])
         bundle = ""
-    # Window titles need Screen Recording permission on recent macOS; the
-    # Accessibility API gives us the focused window title without it.
-    title = _mac_window_title()
     return AppContext(app=" ".join(filter(None, [name, bundle])), title=title)
 
 
-def _mac_window_title() -> str:
+def _mac_focused() -> tuple[int, str]:
+    """(pid, window title) of the focused app via Accessibility."""
     try:
         from ApplicationServices import (
             AXUIElementCopyAttributeValue,
             AXUIElementCreateSystemWide,
+            AXUIElementGetPid,
             kAXFocusedApplicationAttribute,
             kAXFocusedWindowAttribute,
             kAXTitleAttribute,
         )
     except ImportError:
-        return ""
+        return 0, ""
     system = AXUIElementCreateSystemWide()
     err, app = AXUIElementCopyAttributeValue(system, kAXFocusedApplicationAttribute, None)
     if err or app is None:
-        return ""
+        return 0, ""
+    err, pid = AXUIElementGetPid(app, None)
+    pid = 0 if err else int(pid)
     err, window = AXUIElementCopyAttributeValue(app, kAXFocusedWindowAttribute, None)
     if err or window is None:
-        return ""
+        return pid, ""
     err, title = AXUIElementCopyAttributeValue(window, kAXTitleAttribute, None)
-    return "" if err or title is None else str(title)
+    return pid, "" if err or title is None else str(title)
 
 
 def _windows() -> AppContext:

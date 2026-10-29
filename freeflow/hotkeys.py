@@ -242,6 +242,7 @@ class HotkeyListener:
         self.trigger_keys = self.dictate.names() | self.command.names()
         self.on_paste_last = on_paste_last
         self.pressed: set[str] = set()
+        self.enabled = True  # False = paused: keys are tracked but ignored
         self._paste_latched = False
         self._fn_down = False
         self._lock = threading.Lock()
@@ -266,6 +267,8 @@ class HotkeyListener:
             self._evaluate(name, is_press=False)
 
     def _evaluate(self, name: str, is_press: bool) -> None:
+        if not self.enabled:
+            return
         if is_press and self.cancel.active(self.pressed) and self.machine.recording:
             self.machine.cancel()
         if self.paste_last.active(self.pressed):

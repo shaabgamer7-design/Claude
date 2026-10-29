@@ -108,6 +108,7 @@ class Recorder:
         self._recording = False
         self._stream = None
         self._lock = threading.Lock()
+        self.level = 0.0  # RMS of the latest chunk while recording, for meters
 
     def _callback(self, indata, frames, time_info, status) -> None:
         if status:
@@ -116,6 +117,7 @@ class Recorder:
         with self._lock:
             if self._recording:
                 self._frames.append(chunk)
+                self.level = float(np.sqrt(np.mean(np.square(chunk)))) if len(chunk) else 0.0
             elif self.cfg.keep_mic_open:
                 self._preroll.append(chunk)
                 self._preroll_len += len(chunk)
@@ -152,6 +154,7 @@ class Recorder:
     def stop(self) -> Recording:
         with self._lock:
             self._recording = False
+            self.level = 0.0
             frames, self._frames = self._frames, []
         if not self.cfg.keep_mic_open and self._stream is not None:
             self._stream.stop()

@@ -112,8 +112,10 @@ class HTTPTranscriber:
     PRESETS = {
         "groq": ("https://api.groq.com/openai/v1", "whisper-large-v3-turbo", "GROQ_API_KEY"),
         "openai": ("https://api.openai.com/v1", "gpt-4o-transcribe", "OPENAI_API_KEY"),
-        "custom": ("", "whisper-1", ""),
+        # Self-hosted servers often need no key, so it's optional here.
+        "custom": ("", "whisper-1", "FREEFLOW_CUSTOM_STT_KEY"),
     }
+    KEY_REQUIRED = {"groq", "openai"}
 
     def __init__(self, cfg: TranscriptionConfig):
         import requests
@@ -126,8 +128,8 @@ class HTTPTranscriber:
         self.model_name = cfg.model or model
         key_env = cfg.api_key_env or key_env
         self.api_key = os.environ.get(key_env, "") if key_env else ""
-        if key_env and not self.api_key:
-            raise TranscriberError(f"Set the {key_env} environment variable for {self.name}")
+        if key_env and not self.api_key and (cfg.api_key_env or self.name in self.KEY_REQUIRED):
+            raise TranscriberError(f"Add your {self.name} API key (or set {key_env})")
         self.language = _language(cfg)
         self.timeout = cfg.timeout_seconds
         self.session = requests.Session()

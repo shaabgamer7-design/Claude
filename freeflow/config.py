@@ -104,6 +104,13 @@ class HistoryConfig:
 
 
 @dataclass
+class UIConfig:
+    overlay: bool = True  # floating recording bar near the bottom of the screen
+    launch_at_login: bool = False
+    onboarded: bool = False  # first-run setup completed
+
+
+@dataclass
 class StyleRule:
     match: list[str]
     style: str
@@ -117,6 +124,7 @@ class Config:
     cleanup: CleanupConfig = field(default_factory=CleanupConfig)
     output: OutputConfig = field(default_factory=OutputConfig)
     history: HistoryConfig = field(default_factory=HistoryConfig)
+    ui: UIConfig = field(default_factory=UIConfig)
     # Words the speech model and the cleanup model should spell exactly.
     dictionary: list[str] = field(default_factory=list)
     # Case-insensitive find -> replace applied to every result.
@@ -136,6 +144,7 @@ _SECTIONS = {
     "cleanup": CleanupConfig,
     "output": OutputConfig,
     "history": HistoryConfig,
+    "ui": UIConfig,
 }
 
 
@@ -185,6 +194,30 @@ def load(path: Path | None = None) -> Config:
         return Config()
     with open(path, "rb") as f:
         return from_dict(tomllib.load(f))
+
+
+def to_dict(cfg: Config) -> dict[str, Any]:
+    data: dict[str, Any] = {name: dataclasses.asdict(getattr(cfg, name)) for name in _SECTIONS}
+    data["dictionary"] = {"words": list(cfg.dictionary)}
+    data["replacements"] = dict(cfg.replacements)
+    data["snippets"] = dict(cfg.snippets)
+    data["style_prompts"] = dict(cfg.style_prompts)
+    if cfg.styles:
+        data["styles"] = [{"match": list(r.match), "style": r.style} for r in cfg.styles]
+    return data
+
+
+def save(cfg: Config, path: Path | None = None) -> Path:
+    """Write the config (used by the settings window; comments are not kept)."""
+    import tomli_w
+
+    path = path or config_path()
+    path.parent.mkdir(parents=True, exist_ok=True)
+    tmp = path.with_suffix(".tmp")
+    tmp.write_text("# FreeFlow settings (written by the app)\n\n" + tomli_w.dumps(to_dict(cfg)),
+                   encoding="utf-8")
+    tmp.replace(path)
+    return path
 
 
 def default_toml() -> str:
@@ -260,6 +293,11 @@ trailing_space = true
 
 [history]
 enabled = true
+
+[ui]
+overlay = true              # floating recording bar (desktop app)
+launch_at_login = false
+onboarded = false
 
 [dictionary]
 # Names, jargon and product terms to spell exactly.

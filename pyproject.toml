@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "freeflow"
-version = "0.1.0"
+version = "0.2.0"
 description = "Self-hosted voice dictation: hold a key, speak, and polished text appears wherever your cursor is."
 readme = "README.md"
 requires-python = ">=3.10"
@@ -17,20 +17,24 @@ dependencies = [
     "requests>=2.31",
     "sounddevice>=0.4.6",
     "tomli>=2.0; python_version < '3.11'",
+    "tomli-w>=1.0",
     "pyobjc-framework-Cocoa>=10; sys_platform == 'darwin'",
 ]
 
 [project.optional-dependencies]
+# The desktop app: menu-bar icon, recording bar, setup wizard, settings window.
+gui = ["PySide6-Essentials>=6.7", "keyring>=25"]
 # Offline transcription on CPU / NVIDIA GPU.
 local = ["faster-whisper>=1.1"]
 # Offline transcription on Apple Silicon (fastest option on M-series Macs).
 mlx = ["mlx-whisper>=0.4"]
-# Menu-bar / system-tray status icon.
-tray = ["pystray>=0.19", "Pillow>=10"]
 dev = ["pytest>=8"]
 
 [project.scripts]
 freeflow = "freeflow.cli:main"
+
+[project.gui-scripts]
+freeflow-app = "freeflow.gui.main:main"
 
 [tool.setuptools.packages.find]
 include = ["freeflow*"]

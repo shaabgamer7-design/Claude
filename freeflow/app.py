@@ -140,6 +140,27 @@ class App:
         self._worker.shutdown(wait=False, cancel_futures=True)
         self.recorder.close()
 
+    @property
+    def paused(self) -> bool:
+        return not self.listener.enabled
+
+    @paused.setter
+    def paused(self, value: bool) -> None:
+        if value:
+            self.machine.cancel()
+        self.listener.enabled = not value
+        self.status("paused" if value else "idle", "dictation paused" if value else "resumed")
+
+    @property
+    def session(self) -> Session | None:
+        return self._session
+
+    def level(self) -> float:
+        return getattr(self.recorder, "level", 0.0)
+
+    def paste_last(self) -> None:
+        self._on_paste_last()
+
     # Hotkey actions (state machine -> control thread) ----------------------
 
     def _on_action(self, action: str, **kwargs) -> None:

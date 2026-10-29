@@ -25,6 +25,9 @@ def _setup_logging(verbose: bool) -> None:
 
 
 def _load() -> Config:
+    from freeflow import apikeys
+
+    apikeys.load_into_environ()  # keys saved by the desktop app
     path = config.config_path()
     cfg = config.load(path)
     log.debug("config: %s (%s)", path, "found" if path.exists() else "defaults")
@@ -54,7 +57,7 @@ def _history(cfg: Config):
 
 
 def cmd_run(args) -> int:
-    from freeflow import tray
+    """Headless dictation in this terminal. The desktop app is `freeflow-app`."""
     from freeflow.app import App
     from freeflow.audio import Recorder
     from freeflow.output import Output
@@ -62,18 +65,6 @@ def cmd_run(args) -> int:
     cfg = _load()
     pipeline = _pipeline(cfg)
     app = App(cfg, pipeline, Recorder(cfg.audio), Output(cfg.output), _history(cfg))
-
-    if not args.no_tray and tray.available():
-        icon = tray.Tray(on_paste_last=app._on_paste_last, on_quit=app.stop)
-
-        def status(state: str, message: str) -> None:
-            log.info("%-10s %s", state, message)
-            icon.update(state, message)
-
-        app.status = status
-        icon.run(setup=app.start)
-        return 0
-
     app.start()
     try:
         while True:
@@ -255,8 +246,7 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--version", action="version", version=__version__)
     sub = parser.add_subparsers(dest="cmd")
 
-    p = sub.add_parser("run", help="start dictation (default)")
-    p.add_argument("--no-tray", action="store_true", help="don't show a tray icon")
+    p = sub.add_parser("run", help="start dictation in this terminal (default)")
     p.set_defaults(func=cmd_run)
 
     p = sub.add_parser("init", help="write a starter config file")
