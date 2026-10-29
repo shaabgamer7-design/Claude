@@ -28,6 +28,7 @@ jobs:
   macos:
     needs: test
     runs-on: macos-latest
+    timeout-minutes: 45
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -41,6 +42,7 @@ jobs:
           codesign --force --deep --sign - dist/FreeFlow.app
           codesign --verify --deep --strict --verbose=2 dist/FreeFlow.app
       - name: Self-test the app bundle
+        timeout-minutes: 10
         env:
           FREEFLOW_SELFTEST_TRANSCRIBE: "1"
         run: |
@@ -59,6 +61,7 @@ jobs:
   windows:
     needs: test
     runs-on: windows-latest
+    timeout-minutes: 45
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -68,6 +71,7 @@ jobs:
       - run: python packaging/make_icon.py
       - run: pyinstaller packaging/freeflow.spec --noconfirm --clean
       - name: Self-test the app
+        timeout-minutes: 10
         shell: pwsh
         env:
           FREEFLOW_SELFTEST_TRANSCRIBE: "1"

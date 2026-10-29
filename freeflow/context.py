@@ -146,6 +146,14 @@ def _windows() -> AppContext:
 
     user32 = ctypes.windll.user32
     kernel32 = ctypes.windll.kernel32
+    # Pointer-sized return values must not be truncated to a 32-bit int.
+    user32.GetForegroundWindow.restype = wintypes.HWND
+    kernel32.OpenProcess.restype = wintypes.HANDLE
+    kernel32.OpenProcess.argtypes = [wintypes.DWORD, wintypes.BOOL, wintypes.DWORD]
+    kernel32.QueryFullProcessImageNameW.argtypes = [
+        wintypes.HANDLE, wintypes.DWORD, wintypes.LPWSTR, ctypes.POINTER(wintypes.DWORD)
+    ]
+    kernel32.CloseHandle.argtypes = [wintypes.HANDLE]
     hwnd = user32.GetForegroundWindow()
     length = user32.GetWindowTextLengthW(hwnd)
     buf = ctypes.create_unicode_buffer(length + 1)

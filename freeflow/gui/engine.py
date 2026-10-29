@@ -33,7 +33,7 @@ class Engine(QObject):
         super().__init__()
         self.app: App | None = None
         self.cfg: Config | None = None
-        self.state, self.message = "loading", ""
+        self.state, self.message = "stopped", ""
         self._stt = None
         self._stt_cfg = None
         self._generation = 0
@@ -51,6 +51,7 @@ class Engine(QObject):
             generation = self._generation
             old, self.app = self.app, None
             self.cfg = cfg
+            self.state = "loading"
         if old is not None:
             old.stop()
         threading.Thread(target=self._build, args=(cfg, generation), daemon=True,
@@ -100,6 +101,7 @@ class Engine(QObject):
             old, self.app = self.app, None
         if old is not None:
             old.stop()
+        self.state = "stopped"
 
     @property
     def paused(self) -> bool:

@@ -152,7 +152,14 @@ class Controller:
         self.wizard.apply_requested.connect(lambda cfg: self.engine.start(cfg))
         self.wizard.finished_setup.connect(self._wizard_done)
         self.wizard.restart_requested.connect(self.relaunch)
+        self.wizard.rejected.connect(self._wizard_closed)
         bring_to_front(self.wizard)
+
+    def _wizard_closed(self) -> None:
+        # Closed before finishing: run with the current settings anyway (the
+        # wizard shows again next launch until it's completed).
+        if self.engine.app is None and self.engine.state in ("stopped", "error"):
+            self.engine.start(self.cfg)
 
     def _wizard_done(self, cfg: Config) -> None:
         self.apply_config(cfg)

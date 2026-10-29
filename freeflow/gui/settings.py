@@ -114,6 +114,8 @@ class SettingsWindow(QWidget):
         self.sidebar.setStyleSheet(
             "QListWidget { border: none; padding: 8px 6px; font-size: 14px; }"
             "QListWidget::item { padding: 7px 10px; border-radius: 6px; }"
+            "QListWidget::item:selected { background: palette(highlight);"
+            " color: palette(highlighted-text); }"
         )
         self.stack = QStackedWidget()
         for build in (self._general, self._speech, self._ai, self._dictionary, self._styles,

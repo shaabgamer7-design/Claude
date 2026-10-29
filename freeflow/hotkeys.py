@@ -315,6 +315,15 @@ class HotkeyListener:
         )
         self._listener.start()
         self._listener.wait()
+        if IS_MAC:
+            # Without Input Monitoring the event tap can't be created and
+            # pynput's thread quietly exits instead of raising.
+            self._listener.join(0.2)
+            if not self._listener.is_alive():
+                raise RuntimeError(
+                    "macOS blocked the hotkey: allow FreeFlow in System Settings > "
+                    "Privacy & Security > Input Monitoring, then restart FreeFlow"
+                )
 
     def _is_mac_fn_echo(self, name: str) -> bool:
         # pynput reports Fn as a release of an unknown key on every change;

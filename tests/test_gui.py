@@ -183,6 +183,35 @@ def test_engine_reports_errors(qapp, home):
     assert "groq" in errors[0].lower()
 
 
+def test_controller_tray_and_settings(qapp, home, monkeypatch):
+    from freeflow.gui.main import Controller
+    from freeflow.hotkeys import HotkeyListener
+
+    monkeypatch.setattr(HotkeyListener, "start", lambda self: None)
+    monkeypatch.setattr(HotkeyListener, "stop", lambda self: None)
+    cfg = Config()
+    cfg.ui.onboarded = True
+    cfg.transcription.provider = "custom"
+    cfg.transcription.base_url = "http://127.0.0.1:9/v1"
+    cfg.cleanup.provider = "none"
+    controller = Controller(qapp, cfg)
+    controller.start()
+    assert _wait(qapp, lambda: controller.engine.app is not None)
+    assert controller.status_action.text().startswith("Ready")
+    controller.pause_action.setChecked(True)
+    assert controller.engine.paused
+    assert _wait(qapp, lambda: controller.status_action.text() == "Paused")
+
+    controller.show_settings("Dictionary")
+    controller.settings.words.setPlainText("FreeFlow")
+    controller.settings.save()
+    assert _wait(qapp, lambda: controller.engine.app is not None
+                 and controller.engine.app.cfg.dictionary == ["FreeFlow"])
+    assert not controller.engine.paused  # a settings change resumes dictation
+    assert config.load().dictionary == ["FreeFlow"]
+    controller.engine.stop()
+
+
 def test_autostart_files(home, monkeypatch, tmp_path):
     monkeypatch.setattr(autostart.Path, "home", lambda: tmp_path)
     monkeypatch.setattr(autostart, "IS_MAC", True)
