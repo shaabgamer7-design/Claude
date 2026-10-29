@@ -1,0 +1,39 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "freeflow"
+version = "0.1.0"
+description = "Self-hosted voice dictation: hold a key, speak, and polished text appears wherever your cursor is."
+readme = "README.md"
+requires-python = ">=3.10"
+license = { text = "MIT" }
+dependencies = [
+    "anthropic>=2.3",
+    "numpy>=1.26",
+    "pynput>=1.7.7",
+    "pyperclip>=1.9",
+    "requests>=2.31",
+    "sounddevice>=0.4.6",
+    "tomli>=2.0; python_version < '3.11'",
+    "pyobjc-framework-Cocoa>=10; sys_platform == 'darwin'",
+]
+
+[project.optional-dependencies]
+# Offline transcription on CPU / NVIDIA GPU.
+local = ["faster-whisper>=1.1"]
+# Offline transcription on Apple Silicon (fastest option on M-series Macs).
+mlx = ["mlx-whisper>=0.4"]
+# Menu-bar / system-tray status icon.
+tray = ["pystray>=0.19", "Pillow>=10"]
+dev = ["pytest>=8"]
+
+[project.scripts]
+freeflow = "freeflow.cli:main"
+
+[tool.setuptools.packages.find]
+include = ["freeflow*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
