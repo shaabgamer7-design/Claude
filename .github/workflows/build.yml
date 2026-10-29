@@ -53,6 +53,7 @@ jobs:
           status=$?
           cat selftest.txt
           { echo '### macOS self-test'; echo '```'; cat selftest.txt; echo '```'; } >> "$GITHUB_STEP_SUMMARY"
+          if [ $status -ne 0 ]; then echo '--- library log'; tail -n 80 selftest.txt.log; fi
           exit $status
       - run: bash packaging/macos/make_dmg.sh
       - uses: actions/upload-artifact@v4
@@ -86,6 +87,10 @@ jobs:
           if (-not $finished) { $p.Kill() }
           Get-Content $report
           "### Windows self-test`n``````n$(Get-Content $report -Raw)``````" | Out-File -Append -Encoding utf8 $env:GITHUB_STEP_SUMMARY
+          if (-not $finished -or $p.ExitCode -ne 0) {
+            "--- library log"
+            Get-Content "$report.log" -Tail 80
+          }
           if (-not $finished) { exit 1 }
           exit $p.ExitCode
       - name: Build installer

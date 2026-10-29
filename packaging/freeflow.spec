@@ -28,7 +28,17 @@ hiddenimports += [
 ] + ["pynput._util.darwin", "pynput._util.darwin_vks", "pynput._util.win32",
      "pynput._util.win32_vks", "pynput._util.xorg", "pynput._util.xorg_keysyms"]
 hiddenimports += collect_submodules("keyring.backends")
-datas += copy_metadata("keyring")  # backends are registered as entry points
+hiddenimports += ["hf_xet"]
+# Some libraries look each other up by installed metadata, not by import:
+# keyring finds its backends via entry points, and huggingface_hub only uses
+# hf_xet (its fast model downloader) if hf_xet's metadata is present. Without
+# it, a frozen build quietly takes a slower download path than a pip install.
+for dist in ("keyring", "hf_xet", "huggingface_hub", "tokenizers", "onnxruntime",
+             "ctranslate2", "faster_whisper", "tqdm", "requests", "certifi"):
+    try:
+        datas += copy_metadata(dist)
+    except Exception:
+        pass  # not installed on this platform
 
 icons = ROOT / "packaging" / "build"
 icon = str(icons / ("icon.icns" if sys.platform == "darwin" else "icon.ico"))

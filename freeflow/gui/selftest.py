@@ -18,6 +18,13 @@ import traceback
 def run(report_path: str) -> int:
     os.environ["FREEFLOW_HOME"] = tempfile.mkdtemp(prefix="freeflow-selftest-")
     report = open(report_path, "w", encoding="utf-8")
+    # Library logs (model download requests, retries) go next to the report.
+    import logging
+
+    logging.basicConfig(filename=report_path + ".log", level=logging.INFO,
+                        format="%(asctime)s %(name)s: %(message)s")
+    for name in ("huggingface_hub", "httpx", "httpx2", "httpcore", "httpcore2", "faster_whisper"):
+        logging.getLogger(name).setLevel(logging.DEBUG)
     failed = 0
     total = 0
 
@@ -125,9 +132,12 @@ def run(report_path: str) -> int:
         import ctranslate2
         import faster_whisper
         import onnxruntime
+        from huggingface_hub.utils._runtime import is_xet_available
 
+        if not is_xet_available():
+            raise RuntimeError("hf_xet not detected: model downloads would use the slow path")
         return (f"faster-whisper {faster_whisper.__version__}, ctranslate2 "
-                f"{ctranslate2.__version__}, onnxruntime {onnxruntime.__version__}")
+                f"{ctranslate2.__version__}, onnxruntime {onnxruntime.__version__}, xet ok")
 
     def transcribe_tiny():
         import numpy as np
