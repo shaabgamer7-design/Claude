@@ -1,4 +1,4 @@
-name: Build installers
+name: Build Windows installer
 
 on:
   push:
@@ -24,43 +24,6 @@ jobs:
       - run: pytest -q
         env:
           QT_QPA_PLATFORM: offscreen
-
-  macos:
-    needs: test
-    runs-on: macos-latest
-    timeout-minutes: 45
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
-        with:
-          python-version: "3.12"
-      - run: pip install ".[gui,local]" pyinstaller pillow
-      - run: python packaging/make_icon.py
-      - run: pyinstaller packaging/freeflow.spec --noconfirm --clean
-      - name: Sign (ad hoc)
-        run: |
-          codesign --force --deep --sign - dist/FreeFlow.app
-          codesign --verify --deep --strict --verbose=2 dist/FreeFlow.app
-      - name: Self-test the app bundle
-        timeout-minutes: 10
-        env:
-          FREEFLOW_SELFTEST_TRANSCRIBE: "1"
-        run: |
-          set +e
-          # perl's alarm is a portable stand-in for `timeout` on macOS.
-          perl -e 'alarm shift; exec @ARGV' 480 \
-            dist/FreeFlow.app/Contents/MacOS/FreeFlow --selftest "$PWD/selftest.txt" > /dev/null
-          status=$?
-          cat selftest.txt
-          { echo '### macOS self-test'; echo '```'; cat selftest.txt; echo '```'; } >> "$GITHUB_STEP_SUMMARY"
-          if [ $status -ne 0 ]; then echo '--- library log'; tail -n 80 selftest.txt.log; fi
-          exit $status
-      - run: bash packaging/macos/make_dmg.sh
-      - uses: actions/upload-artifact@v4
-        with:
-          name: FreeFlow-macOS
-          path: dist/FreeFlow-*.dmg
-          if-no-files-found: error
 
   windows:
     needs: test
@@ -111,7 +74,7 @@ jobs:
 
   release:
     if: startsWith(github.ref, 'refs/tags/v')
-    needs: [macos, windows]
+    needs: [windows]
     runs-on: ubuntu-latest
     permissions:
       contents: write
