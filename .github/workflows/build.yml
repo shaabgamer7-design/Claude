@@ -6,6 +6,11 @@ on:
     tags: ["v*"]
   pull_request:
   workflow_dispatch:
+    inputs:
+      release:
+        description: "Publish a GitHub Release (creates the v<version> tag)"
+        type: boolean
+        default: false
 
 permissions:
   contents: read
@@ -29,6 +34,8 @@ jobs:
     needs: test
     runs-on: windows-latest
     timeout-minutes: 45
+    outputs:
+      version: ${{ steps.installer.outputs.version }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -57,9 +64,11 @@ jobs:
           if (-not $finished) { exit 1 }
           exit $p.ExitCode
       - name: Build installer
+        id: installer
         shell: pwsh
         run: |
           $version = python -c "import freeflow; print(freeflow.__version__)"
+          "version=$version" | Out-File -Append -Encoding utf8 $env:GITHUB_OUTPUT
           $iscc = "${env:ProgramFiles(x86)}\Inno Setup 6\ISCC.exe"
           if (-not (Test-Path $iscc)) {
             choco install innosetup -y --no-progress
@@ -73,7 +82,9 @@ jobs:
           if-no-files-found: error
 
   release:
-    if: startsWith(github.ref, 'refs/tags/v')
+    # On a pushed v* tag, or when run by hand with "release" ticked (the
+    # release then creates the tag on the commit that was built and tested).
+    if: startsWith(github.ref, 'refs/tags/v') || (github.event_name == 'workflow_dispatch' && inputs.release)
     needs: [windows]
     runs-on: ubuntu-latest
     permissions:
@@ -85,5 +96,14 @@ jobs:
           merge-multiple: true
       - uses: softprops/action-gh-release@v2
         with:
+          tag_name: v${{ needs.windows.outputs.version }}
+          target_commitish: ${{ github.sha }}
+          name: FreeFlow ${{ needs.windows.outputs.version }} for Windows
           files: installers/*
           generate_release_notes: true
+          body: |
+            **Download `FreeFlow-Setup-${{ needs.windows.outputs.version }}.exe` below** and run it (Windows 10/11, 64-bit, no admin rights needed).
+
+            If Windows shows "Windows protected your PC", click **More info → Run anyway** (the installer isn't code-signed).
+
+            On first launch a short setup walks you through choosing speech recognition and AI editing, adding API keys and testing your microphone. Then hold **Right Ctrl**, speak, and let go.
