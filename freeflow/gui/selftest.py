@@ -1,7 +1,8 @@
 """`FreeFlow --selftest report.txt`: checks that a packaged build has everything.
 
 CI runs this on the built .app / .exe, so a missing library shows up as a red
-build instead of a crash on someone's computer.
+build instead of a crash on someone's computer. Each check has a time limit and
+the report is written as it goes, so a hang names the check that hung.
 """
 
 from __future__ import annotations
@@ -10,19 +11,64 @@ import os
 import platform
 import sys
 import tempfile
+import threading
 import traceback
 
 
 def run(report_path: str) -> int:
     os.environ["FREEFLOW_HOME"] = tempfile.mkdtemp(prefix="freeflow-selftest-")
-    results: list[tuple[str, str, str]] = []
+    report = open(report_path, "w", encoding="utf-8")
+    failed = 0
+    total = 0
 
-    def check(name, fn):
+    def emit(line: str) -> None:
+        report.write(line + "\n")
+        report.flush()
         try:
-            detail = fn()
-            results.append(("ok", name, str(detail or "")))
-        except BaseException as e:  # noqa: BLE001 - report everything, including SystemExit
-            results.append(("FAIL", name, f"{e!r}\n{traceback.format_exc()}"))
+            print(line, flush=True)
+        except Exception:  # windowed build without a console
+            pass
+
+    def record(status: str, name: str, detail: str) -> None:
+        nonlocal failed, total
+        total += 1
+        failed += status == "FAIL"
+        emit(f"[{status}] {name}: {detail}")
+
+    def check(name, fn, timeout: float = 60, required: bool = True, thread: bool = True):
+        emit(f"... {name}")
+        if not thread:  # Qt widgets must be created on the main thread
+            def give_up():
+                record("FAIL", name, f"timed out after {timeout:.0f}s")
+                report.close()
+                os._exit(1)
+
+            watchdog = threading.Timer(timeout, give_up)
+            watchdog.daemon = True
+            watchdog.start()
+            try:
+                record("ok", name, str(fn() or ""))
+            except BaseException as e:  # noqa: BLE001 - report everything
+                record("FAIL", name, f"{e!r}\n{traceback.format_exc()}")
+            watchdog.cancel()
+            return
+        result: dict = {}
+
+        def target():
+            try:
+                result["detail"] = str(fn() or "")
+            except BaseException as e:  # noqa: BLE001
+                result["error"] = f"{e!r}\n{traceback.format_exc()}"
+
+        worker = threading.Thread(target=target, daemon=True)
+        worker.start()
+        worker.join(timeout)
+        if worker.is_alive():
+            record("FAIL" if required else "warn", name, f"timed out after {timeout:.0f}s")
+        elif "error" in result:
+            record("FAIL" if required else "warn", name, result["error"])
+        else:
+            record("ok", name, result["detail"])
 
     def numpy_check():
         import numpy
@@ -61,7 +107,7 @@ def run(report_path: str) -> int:
 
         return f"requests {requests.__version__}, {os.path.basename(certifi.where())}"
 
-    def keychain():
+    def keychain_backend():
         import keyring
 
         backend = type(keyring.get_keyring())
@@ -69,6 +115,11 @@ def run(report_path: str) -> int:
         if sys.platform in ("darwin", "win32") and backend.__module__.endswith(".fail"):
             raise RuntimeError(f"no system keychain backend found ({name})")
         return name
+
+    def keychain_read():
+        from freeflow import apikeys
+
+        return f"read ok ({'empty' if not apikeys.read('FREEFLOW_SELFTEST') else 'value'})"
 
     def whisper():
         import ctranslate2
@@ -110,23 +161,25 @@ def run(report_path: str) -> int:
         sizes = [w.grab().size() for w in windows]
         return f"{app.platformName()}: " + ", ".join(f"{s.width()}x{s.height()}" for s in sizes)
 
+    emit(f"FreeFlow selftest on {platform.platform()} (Python {sys.version.split()[0]})")
     check("numpy", numpy_check)
     check("audio (PortAudio)", portaudio)
     check("keyboard hooks (pynput)", keyboard)
     check("clipboard", clipboard)
     check("Claude client", claude)
     check("HTTPS", tls)
-    check("keychain", keychain)
+    check("keychain backend", keychain_backend)
+    # A CI machine's keychain can be locked and wait for a password forever;
+    # on a logged-in computer this returns immediately.
+    check("keychain read", keychain_read, timeout=20, required=False)
     check("on-device speech libraries", whisper)
     if os.environ.get("FREEFLOW_SELFTEST_TRANSCRIBE"):
-        check("on-device transcription (tiny model)", transcribe_tiny)
+        check("on-device transcription (tiny model)", transcribe_tiny, timeout=300)
     check("settings file", settings_io)
-    check("windows render", qt)
-
-    failed = [r for r in results if r[0] != "ok"]
-    lines = [f"FreeFlow selftest on {platform.platform()} (Python {sys.version.split()[0]})"]
-    lines += [f"[{status}] {name}: {detail}" for status, name, detail in results]
-    lines.append(f"{len(results) - len(failed)}/{len(results)} passed")
-    with open(report_path, "w", encoding="utf-8") as f:
-        f.write("\n".join(lines) + "\n")
-    return 1 if failed else 0
+    os.environ["FREEFLOW_NO_KEYCHAIN"] = "1"  # the windows below read API keys
+    check("windows render", qt, thread=False)
+    emit(f"{total - failed}/{total} passed")
+    report.close()
+    sys.stdout.flush()
+    # A check that timed out may still be stuck in native code; don't wait for it.
+    os._exit(1 if failed else 0)

@@ -45,6 +45,8 @@ def _write_fallback(data: dict[str, str]) -> None:
 
 
 def _keyring():
+    if os.environ.get("FREEFLOW_NO_KEYCHAIN"):
+        return None
     try:
         import keyring
         from keyring.backends import fail

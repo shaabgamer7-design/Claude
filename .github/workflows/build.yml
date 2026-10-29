@@ -47,9 +47,12 @@ jobs:
           FREEFLOW_SELFTEST_TRANSCRIBE: "1"
         run: |
           set +e
-          dist/FreeFlow.app/Contents/MacOS/FreeFlow --selftest "$PWD/selftest.txt"
+          # perl's alarm is a portable stand-in for `timeout` on macOS.
+          perl -e 'alarm shift; exec @ARGV' 480 \
+            dist/FreeFlow.app/Contents/MacOS/FreeFlow --selftest "$PWD/selftest.txt" > /dev/null
           status=$?
           cat selftest.txt
+          { echo '### macOS self-test'; echo '```'; cat selftest.txt; echo '```'; } >> "$GITHUB_STEP_SUMMARY"
           exit $status
       - run: bash packaging/macos/make_dmg.sh
       - uses: actions/upload-artifact@v4
@@ -77,8 +80,13 @@ jobs:
           FREEFLOW_SELFTEST_TRANSCRIBE: "1"
         run: |
           $report = Join-Path $PWD "selftest.txt"
-          $p = Start-Process -FilePath "dist\FreeFlow\FreeFlow.exe" -ArgumentList "--selftest", "`"$report`"" -Wait -PassThru
+          $p = Start-Process -FilePath "dist\FreeFlow\FreeFlow.exe" -ArgumentList "--selftest", "`"$report`"" -PassThru
+          $null = $p.Handle  # keeps ExitCode readable after WaitForExit
+          $finished = $p.WaitForExit(480000)
+          if (-not $finished) { $p.Kill() }
           Get-Content $report
+          "### Windows self-test`n``````n$(Get-Content $report -Raw)``````" | Out-File -Append -Encoding utf8 $env:GITHUB_STEP_SUMMARY
+          if (-not $finished) { exit 1 }
           exit $p.ExitCode
       - name: Build installer
         shell: pwsh
@@ -88,7 +96,7 @@ jobs:
           if (-not (Test-Path $iscc)) {
             choco install innosetup -y --no-progress
           }
-          & $iscc "/DAppVersion=$version" packaging\windows\freeflow.iss
+          & $iscc /Q "/DAppVersion=$version" packaging\windows\freeflow.iss
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
       - uses: actions/upload-artifact@v4
         with:
