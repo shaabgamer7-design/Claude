@@ -1,0 +1,895 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE html>
+<html b:css='false' b:defaultwidgetversion='2' b:layoutsVersion='3' b:responsive='true' b:templateVersion='1.0.0' expr:dir='data:blog.languageDirection' lang='en' xmlns='http://www.w3.org/1999/xhtml' xmlns:b='http://www.google.com/2005/gml/b' xmlns:data='http://www.google.com/2005/gml/data' xmlns:expr='http://www.google.com/2005/gml/expr'>
+<!--
+  ==========================================================================
+  Ghulam Hussain Farms — Blogger Theme v1.0.0
+  Family mango orchard · Alipur, District Muzaffargarh, Punjab, Pakistan
+  ghulamhussainfarms.blogspot.com
+
+  HOW TO EDIT (search this file for these markers with Ctrl+F):
+    [IMG-...]   photo slots. Replace  data:,IMG-name  with your Blogger image URL.
+    [SEO]       titles, descriptions and keyword-bearing headings.
+    [CONTACT]   phone / WhatsApp / address.
+  Full instructions: README.md in the same folder.
+  ==========================================================================
+-->
+<head>
+  <meta charset='utf-8'/>
+  <meta content='width=device-width, initial-scale=1' name='viewport'/>
+  <meta content='#142519' name='theme-color'/>
+
+  <!-- [SEO] Page title: homepage gets a keyword-rich title, every other page gets "Page | Site" -->
+  <b:if cond='data:view.isHomepage'>
+    <title>Ghulam Hussain Farms | Chaunsa, Sindhri &amp; Anwar Ratol Mangoes from Alipur, Punjab</title>
+  <b:elseif cond='data:view.isError'/>
+    <title>Page not found | <data:blog.title.escaped/></title>
+  <b:else/>
+    <title><data:view.title.escaped/> | <data:blog.title.escaped/></title>
+  </b:if>
+
+  <!-- [SEO] Meta description: uses Blogger's "Search description" when set, otherwise this default -->
+  <b:if cond='data:view.description'>
+    <meta expr:content='data:view.description.escaped' name='description'/>
+  <b:elseif cond='data:view.isHomepage'/>
+    <meta content='Buy fresh Chaunsa, Sindhri, Anwar Ratol and Langra mangoes direct from Ghulam Hussain Farms, a family mango orchard in Alipur, Muzaffargarh, Punjab. Order on WhatsApp.' name='description'/>
+  </b:if>
+
+  <link expr:href='data:view.url.canonical' rel='canonical'/>
+  <b:if cond='data:view.isError or data:view.isSearch or data:view.isArchive'>
+    <meta content='noindex, follow' name='robots'/>
+  </b:if>
+
+  <!-- Feeds -->
+  <link expr:href='data:blog.homepageUrl + &quot;feeds/posts/default&quot;' expr:title='data:blog.title + &quot; - Atom&quot;' rel='alternate' type='application/atom+xml'/>
+
+  <!-- Open Graph / social sharing (WhatsApp, Facebook) -->
+  <meta content='website' property='og:type'/>
+  <meta expr:content='data:blog.title' property='og:site_name'/>
+  <meta expr:content='data:view.url.canonical' property='og:url'/>
+  <b:if cond='data:view.isHomepage'>
+    <meta content='Ghulam Hussain Farms — Premium Mangoes from Alipur, Punjab' property='og:title'/>
+  <b:else/>
+    <meta expr:content='data:view.title' property='og:title'/>
+  </b:if>
+  <b:if cond='data:view.description'>
+    <meta expr:content='data:view.description' property='og:description'/>
+  <b:else/>
+    <meta content='Fresh Chaunsa, Sindhri, Anwar Ratol and Langra mangoes direct from our family orchard in Alipur, Punjab.' property='og:description'/>
+  </b:if>
+  <b:if cond='data:view.featuredImage'>
+    <meta expr:content='data:view.featuredImage' property='og:image'/>
+  <b:else/>
+    <!-- [IMG-share] default share image (1200x630 works best). Replace with your hero photo URL. -->
+    <meta content='data:,IMG-share' property='og:image'/>
+  </b:if>
+  <meta content='summary_large_image' name='twitter:card'/>
+  <meta content='en_PK' property='og:locale'/>
+
+  <!-- Fonts -->
+  <link href='https://fonts.googleapis.com' rel='preconnect'/>
+  <link crossorigin='anonymous' href='https://fonts.gstatic.com' rel='preconnect'/>
+  <link href='https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600&amp;family=Inter:wght@400;500;600&amp;display=swap' rel='stylesheet'/>
+
+  <!-- Marks JS as available so scroll-reveal only hides content when it can show it again -->
+  <script>//<![CDATA[
+  document.documentElement.className += ' js';
+  /* Cosmetic: hide Blogger's ?m=1 from the address bar (the page is identical either way) */
+  try {
+    var u = new URL(location.href);
+    if (u.searchParams.get('m') === '1' && history.replaceState) {
+      u.searchParams.delete('m');
+      history.replaceState(null, '', u.toString());
+    }
+  } catch (e) {}
+  //]]></script>
+
+  <!-- [SEO] Structured data: business details for Google (homepage only) -->
+  <b:if cond='data:view.isHomepage'>
+  <script type='application/ld+json'>//<![CDATA[
+  {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "LocalBusiness",
+        "@id": "https://ghulamhussainfarms.blogspot.com/#farm",
+        "name": "Ghulam Hussain Farms",
+        "description": "Family mango orchard in Alipur, District Muzaffargarh, Punjab, growing Chaunsa, Sindhri, Anwar Ratol, Langra and Lator mangoes for retail, wholesale and export buyers.",
+        "url": "https://ghulamhussainfarms.blogspot.com/",
+        "telephone": "+92-314-4419652",
+        "founder": { "@type": "Person", "name": "Ghulam Hussain" },
+        "address": {
+          "@type": "PostalAddress",
+          "streetAddress": "Makhan Bela, near Head Panjnad Bridge (Al Mustafa Pump)",
+          "addressLocality": "Alipur",
+          "addressRegion": "Punjab",
+          "addressCountry": "PK"
+        },
+        "geo": { "@type": "GeoCoordinates", "latitude": 29.3535955, "longitude": 71.0105049 },
+        "hasMap": "https://www.google.com/maps/search/?api=1&query=29.3535955,71.0105049",
+        "areaServed": "Pakistan",
+        "knowsAbout": ["Chaunsa mango", "Sindhri mango", "Anwar Ratol mango", "Langra mango", "Mango export"]
+      },
+      {
+        "@type": "WebSite",
+        "@id": "https://ghulamhussainfarms.blogspot.com/#website",
+        "url": "https://ghulamhussainfarms.blogspot.com/",
+        "name": "Ghulam Hussain Farms",
+        "potentialAction": {
+          "@type": "SearchAction",
+          "target": "https://ghulamhussainfarms.blogspot.com/search?q={query}",
+          "query-input": "required name=query"
+        }
+      }
+    ]
+  }
+  //]]></script>
+  </b:if>
+
+<b:skin><![CDATA[
+/* ==========================================================================
+   0. DESIGN TOKENS
+   ========================================================================== */
+:root{
+  --cream:#FAF6EC; --cream-2:#F2EAD8; --white:#fff;
+  --ink:#1C1810; --ink-soft:rgba(28,24,16,.72); --ink-faint:rgba(28,24,16,.5);
+  --forest:#1E3626; --forest-2:#142519; --forest-tint:#2C4736;
+  --mango:#E39A2E; --mango-deep:#A85F14; --mango-pale:#F3C876;
+  --line:rgba(28,24,16,.12); --line-dark:rgba(250,246,236,.16);
+  --display:"Fraunces",Georgia,"Times New Roman",serif;
+  --body:"Inter",-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
+  --wrap:1200px; --narrow:760px;
+  --gutter:clamp(1rem,4vw,3rem);
+  --pad:clamp(3.5rem,8vw,7rem);
+  --r:12px; --ease:cubic-bezier(.22,.61,.36,1);
+}
+
+/* ==========================================================================
+   1. BASE
+   ========================================================================== */
+*,*::before,*::after{box-sizing:border-box}
+html{scroll-behavior:smooth;-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--cream);color:var(--ink);font:16px/1.65 var(--body);-webkit-font-smoothing:antialiased;overflow-x:hidden}
+img,svg,video,iframe{max-width:100%;display:block}
+img{height:auto}
+a{color:inherit;text-decoration:none}
+h1,h2,h3,h4{font-family:var(--display);font-weight:500;line-height:1.12;letter-spacing:-.01em;margin:0 0 .5em}
+p{margin:0 0 1em}
+ul,ol{margin:0;padding:0}
+button,input,select,textarea{font:inherit}
+:focus-visible{outline:2px solid var(--mango);outline-offset:3px}
+.skip-link{position:absolute;left:-999px;top:0;z-index:1000;background:var(--forest);color:var(--cream);padding:.8em 1.2em}
+.skip-link:focus{left:0}
+.sr-only{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap}
+
+/* Placeholder photo slots: until a real URL is pasted, show the branded gradient */
+.media{display:block;position:relative;overflow:hidden;border-radius:var(--r);background:radial-gradient(circle at 25% 20%,rgba(227,154,46,.4),transparent 55%),linear-gradient(135deg,#23402C,#1A2E20)}
+.media img{width:100%;height:100%;object-fit:cover}
+img[src^="data:,"]{opacity:0}
+
+.wrap{max-width:var(--wrap);margin-inline:auto;padding-inline:var(--gutter)}
+.wrap--narrow{max-width:var(--narrow)}
+.section{padding-block:var(--pad)}
+.section--tint{background:var(--cream-2)}
+.section--dark{background:var(--forest-2);color:var(--cream)}
+.section--forest{background:var(--forest);color:var(--cream)}
+
+.eyebrow{display:inline-block;font-size:.75rem;font-weight:600;letter-spacing:.16em;text-transform:uppercase;color:var(--mango-deep);margin-bottom:1em}
+.section--dark .eyebrow,.section--forest .eyebrow{color:var(--mango-pale)}
+.title{font-size:clamp(1.9rem,4.2vw,3.2rem);max-width:20ch}
+.lede{font-size:clamp(1.02rem,1.5vw,1.2rem);color:var(--ink-soft);max-width:56ch}
+.section--dark .lede,.section--forest .lede{color:rgba(250,246,236,.78)}
+.head{margin-bottom:clamp(2rem,5vw,3.5rem)}
+.head--split{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:flex-end;gap:1.5rem}
+.center{text-align:center}
+.center .title,.center .lede{margin-inline:auto}
+
+/* ==========================================================================
+   2. BUTTONS (min 48px tap height)
+   ========================================================================== */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:.55em;min-height:48px;padding:.8em 1.6em;border-radius:999px;border:1px solid transparent;font-size:.95rem;font-weight:600;line-height:1.2;cursor:pointer;transition:transform .25s var(--ease),background .25s var(--ease),color .25s var(--ease)}
+.btn:hover{transform:translateY(-2px)}
+.btn svg{width:20px;height:20px;flex:none}
+.btn--primary{background:var(--mango);color:var(--forest-2)}
+.btn--primary:hover{background:var(--mango-deep);color:var(--white)}
+.btn--outline{border-color:currentColor;background:transparent;color:inherit}
+.btn--outline:hover{background:var(--ink);color:var(--cream);border-color:var(--ink)}
+.section--dark .btn--outline:hover,.section--forest .btn--outline:hover,.hero .btn--outline:hover,.cta .btn--outline:hover{background:var(--cream);color:var(--forest-2);border-color:var(--cream)}
+.btn--wa{background:var(--forest);color:var(--cream)}
+.btn--wa:hover{background:var(--forest-2)}
+.section--dark .btn--wa,.section--forest .btn--wa{background:var(--mango);color:var(--forest-2)}
+.btn--sm{min-height:42px;padding:.6em 1.2em;font-size:.85rem}
+.btn-row{display:flex;flex-wrap:wrap;gap:.8rem}
+.link-arrow{font-weight:600;color:var(--mango-deep);border-bottom:1px solid currentColor;padding-bottom:2px}
+.section--dark .link-arrow,.section--forest .link-arrow{color:var(--mango-pale)}
+
+/* ==========================================================================
+   3. HEADER & NAV
+   ========================================================================== */
+.site-header{position:fixed;top:0;left:0;right:0;z-index:500;padding-block:1rem;transition:background .3s var(--ease),padding .3s var(--ease),box-shadow .3s var(--ease);background:linear-gradient(to bottom,rgba(20,37,25,.6),rgba(20,37,25,0))}
+.site-header .wrap{display:flex;align-items:center;justify-content:space-between;gap:1rem}
+.brand{font-family:var(--display);font-size:1.05rem;font-weight:600;letter-spacing:.05em;text-transform:uppercase;color:var(--cream);display:flex;align-items:center;gap:.55rem;min-height:44px}
+.brand svg{width:26px;height:26px;flex:none}
+.nav{display:none}
+.nav ul{display:flex;gap:1.75rem;list-style:none}
+.nav a{font-size:.9rem;font-weight:500;color:var(--cream);padding-block:.5em;position:relative}
+.nav a::after{content:"";position:absolute;left:0;bottom:.2em;width:0;height:1px;background:currentColor;transition:width .3s var(--ease)}
+.nav a:hover::after{width:100%}
+.header-cta{display:none}
+.menu-btn{display:inline-flex;align-items:center;justify-content:center;width:46px;height:46px;border-radius:50%;border:1px solid var(--line-dark);background:transparent;color:var(--cream);cursor:pointer}
+.menu-btn svg{width:22px;height:22px}
+.menu-btn .i-close{display:none}
+.menu-open .menu-btn .i-open{display:none}
+.menu-open .menu-btn .i-close{display:block}
+
+/* Solid header: after scrolling, and always on inner pages */
+.site-header.is-solid,.is-inner .site-header{background:rgba(250,246,236,.96);box-shadow:0 1px 0 var(--line);padding-block:.6rem;-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px)}
+.site-header.is-solid .brand,.is-inner .site-header .brand,
+.site-header.is-solid .nav a,.is-inner .site-header .nav a,
+.site-header.is-solid .menu-btn,.is-inner .site-header .menu-btn{color:var(--ink)}
+.site-header.is-solid .menu-btn,.is-inner .site-header .menu-btn{border-color:var(--line)}
+.menu-open .site-header .brand,.menu-open .site-header .menu-btn{color:var(--cream)}
+.menu-open .site-header{background:transparent;box-shadow:none}
+
+.mobile-nav{position:fixed;inset:0;z-index:490;background:var(--forest-2);color:var(--cream);padding:6rem var(--gutter) 2rem;display:flex;flex-direction:column;gap:2rem;overflow-y:auto;transform:translateY(-100%);visibility:hidden;transition:transform .45s var(--ease),visibility 0s .45s}
+.menu-open .mobile-nav{transform:none;visibility:visible;transition:transform .45s var(--ease)}
+.menu-open{overflow:hidden}
+.mobile-nav ul{list-style:none;display:flex;flex-direction:column}
+.mobile-nav ul a{display:block;font-family:var(--display);font-size:1.6rem;padding:.45em 0;border-bottom:1px solid var(--line-dark)}
+.mobile-nav .btn-row{flex-direction:column}
+.mobile-nav .btn{width:100%}
+
+@media (min-width:960px){
+  .nav{display:block}
+  .header-cta{display:inline-flex}
+  .menu-btn,.mobile-nav{display:none}
+}
+
+/* ==========================================================================
+   4. HOMEPAGE
+   ========================================================================== */
+.hero{position:relative;min-height:92vh;min-height:92svh;display:flex;align-items:flex-end;color:var(--cream);background:var(--forest-2);overflow:hidden}
+.hero .media{position:absolute;inset:0;border-radius:0}
+.hero .media::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(18,36,26,.45) 0%,rgba(18,36,26,.15) 40%,rgba(18,36,26,.9) 100%)}
+.hero-content{position:relative;z-index:2;width:100%;padding-block:8rem clamp(3rem,8vw,6rem)}
+.hero h1{font-size:clamp(2.3rem,6.4vw,4.8rem);max-width:17ch;color:var(--white)}
+.hero .lede{color:rgba(250,246,236,.86);max-width:46ch;margin-bottom:2rem}
+.hero .eyebrow{color:var(--mango-pale)}
+
+.trust{background:var(--forest);color:var(--cream);padding-block:1.6rem}
+.trust ul{list-style:none;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:1rem 1.5rem}
+.trust li{display:flex;align-items:center;gap:.7rem;font-size:.9rem;font-weight:500}
+.trust svg{width:22px;height:22px;flex:none;color:var(--mango-pale)}
+@media (min-width:860px){.trust ul{grid-template-columns:repeat(4,minmax(0,1fr))}}
+
+.cards{display:grid;gap:1.25rem;grid-template-columns:repeat(auto-fill,minmax(min(100%,250px),1fr))}
+.card{background:var(--white);border:1px solid var(--line);border-radius:var(--r);overflow:hidden;display:flex;flex-direction:column;transition:transform .3s var(--ease),box-shadow .3s var(--ease)}
+.card:hover{transform:translateY(-4px);box-shadow:0 14px 30px rgba(20,37,25,.1)}
+.card .media{aspect-ratio:4/3;border-radius:0}
+.card-body{padding:1.25rem 1.3rem 1.4rem;display:flex;flex-direction:column;gap:.35rem;flex-grow:1}
+.card-body h3{font-size:1.35rem;margin:0}
+.card-body p{font-size:.93rem;color:var(--ink-soft);margin:0}
+.card-tag{font-size:.7rem;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--mango-deep)}
+.card-body .link-arrow{margin-top:auto;padding-top:.6rem;align-self:flex-start;border:0}
+
+.split{display:grid;gap:clamp(2rem,5vw,4.5rem);grid-template-columns:minmax(0,1fr);align-items:center}
+.split .media{aspect-ratio:4/5}
+@media (min-width:900px){.split{grid-template-columns:minmax(0,1.05fr) minmax(0,.95fr)}.split--rev .split-media{order:-1}}
+.split p{color:var(--ink-soft);font-size:1.03rem}
+.section--dark .split p,.section--forest .split p{color:rgba(250,246,236,.78)}
+
+.steps{list-style:none;display:grid;gap:1px;background:var(--line-dark);grid-template-columns:minmax(0,1fr);border-radius:var(--r);overflow:hidden;counter-reset:s}
+.steps li{background:var(--forest);padding:2rem 1.75rem;counter-increment:s}
+.steps li::before{content:"0" counter(s);display:block;font-family:var(--display);font-size:2.2rem;color:rgba(250,246,236,.3);margin-bottom:.6rem}
+.steps h3{font-size:1.15rem;margin-bottom:.4rem}
+.steps p{font-size:.93rem;color:rgba(250,246,236,.75);margin:0}
+@media (min-width:760px){.steps{grid-template-columns:repeat(3,minmax(0,1fr))}}
+
+.tags{display:flex;flex-wrap:wrap;gap:.5rem;margin-block:1.25rem 1.75rem;list-style:none}
+.tags li,.tags a{font-size:.8rem;padding:.45em 1em;border:1px solid var(--line);border-radius:999px;color:var(--ink-soft)}
+.section--dark .tags li,.section--forest .tags li{border-color:var(--line-dark);color:rgba(250,246,236,.8)}
+
+.duo{display:grid;gap:1.25rem;grid-template-columns:minmax(0,1fr)}
+@media (min-width:820px){.duo{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.panel{border:1px solid var(--line-dark);border-radius:var(--r);padding:clamp(1.5rem,4vw,2.5rem);background:rgba(250,246,236,.04)}
+.panel h3{font-size:1.5rem}
+.panel p{color:rgba(250,246,236,.78)}
+
+.cta{position:relative;color:var(--white);text-align:center;overflow:hidden;background:var(--forest-2)}
+.cta .media{position:absolute;inset:0;border-radius:0}
+.cta .media::after{content:"";position:absolute;inset:0;background:rgba(18,30,20,.68)}
+.cta-content{position:relative;z-index:1;padding-block:clamp(4.5rem,10vw,8rem)}
+.cta h2{font-size:clamp(2rem,5vw,3.4rem);color:var(--white)}
+.cta .lede{color:rgba(255,255,255,.86);margin-inline:auto}
+.cta .btn-row{justify-content:center;margin-top:1.75rem}
+
+/* ==========================================================================
+   5. POSTS, PAGES & LISTINGS (Blog1 widget)
+   ========================================================================== */
+.page-hero{background:var(--forest-2);color:var(--cream);padding:clamp(7.5rem,14vw,10rem) 0 clamp(2.5rem,5vw,3.5rem)}
+.page-hero h1{font-size:clamp(2rem,5vw,3.4rem);max-width:24ch;color:var(--white);margin:0}
+.page-hero .eyebrow{color:var(--mango-pale)}
+.crumbs{font-size:.82rem;color:rgba(250,246,236,.65);margin-bottom:1rem}
+.crumbs a{text-decoration:underline;text-underline-offset:2px}
+.post-meta{display:flex;flex-wrap:wrap;gap:.4em .9em;margin-top:1rem;font-size:.88rem;color:rgba(250,246,236,.7)}
+
+.entry{padding-block:clamp(2.5rem,6vw,4.5rem) var(--pad)}
+.entry-content{font-size:1.06rem;max-width:var(--narrow);margin-inline:auto}
+.entry-content > *{max-width:100%}
+.entry-content > .band{max-width:none}
+.entry-content h2{font-size:clamp(1.5rem,3vw,2.1rem);margin-top:2.2em}
+.entry-content h3{font-size:1.3rem;margin-top:1.8em}
+.entry-content a{color:var(--mango-deep);text-decoration:underline;text-underline-offset:2px}
+.entry-content a.btn{text-decoration:none}
+.entry-content a.btn--primary{color:var(--forest-2)}
+.entry-content a.btn--wa{color:var(--cream)}
+.entry-content ul,.entry-content ol{padding-left:1.3em;margin:0 0 1.2em}
+.entry-content li{margin-bottom:.4em}
+.entry-content img{border-radius:var(--r);margin-block:1.25em;height:auto!important}
+.entry-content .separator a{margin:0!important}
+.entry-content blockquote{margin:1.5em 0;padding:1em 1.4em;border-left:3px solid var(--mango);background:var(--cream-2);border-radius:0 var(--r) var(--r) 0}
+.entry-content table{width:100%;border-collapse:collapse;margin:1.5em 0;font-size:.95rem;display:block;overflow-x:auto}
+.entry-content th,.entry-content td{text-align:left;padding:.75em .9em;border-bottom:1px solid var(--line);vertical-align:top}
+.entry-content th{font-size:.75rem;letter-spacing:.06em;text-transform:uppercase;color:var(--mango-deep);background:var(--cream-2)}
+.entry-content iframe{width:100%;border:0;border-radius:var(--r)}
+
+/* Full-width bands inside page content: <div class="band"> ... </div> */
+.entry-content .band{width:100vw;margin-left:calc(50% - 50vw);padding:clamp(2.5rem,6vw,4.5rem) var(--gutter);background:var(--cream-2);margin-block:2.5em}
+.entry-content .band > *{max-width:var(--narrow);margin-inline:auto}
+.entry-content .band--dark{background:var(--forest-2);color:var(--cream)}
+.entry-content .band--dark a:not(.btn){color:var(--mango-pale)}
+.entry-content .band--dark h2,.entry-content .band--dark h3{color:var(--white)}
+
+/* Reusable content blocks for pages */
+.entry-content .grid{display:grid;gap:1.25rem;grid-template-columns:repeat(auto-fill,minmax(min(100%,220px),1fr));margin:1.5em 0}
+.entry-content .box{background:var(--white);border:1px solid var(--line);border-radius:var(--r);padding:1.4rem}
+.entry-content .box h3{margin-top:0;font-size:1.15rem}
+.entry-content .box p:last-child{margin:0}
+.entry-content .band--dark .box{background:rgba(250,246,236,.05);border-color:var(--line-dark)}
+.entry-content .variety{display:grid;gap:1.5rem;grid-template-columns:minmax(0,1fr);align-items:start;padding-block:1.5em;border-top:1px solid var(--line)}
+.entry-content .variety h2{margin-top:0}
+.entry-content .variety img{margin:0;aspect-ratio:4/3;object-fit:cover;width:100%}
+@media (min-width:720px){.entry-content .variety{grid-template-columns:minmax(0,.9fr) minmax(0,1.1fr)}}
+.entry-content .tags{padding-left:0}
+.entry-content .facts{list-style:none;padding:0;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:.6rem 1rem;font-size:.92rem}
+.entry-content .facts li{margin:0}
+.entry-content .facts strong{display:block;font-size:.7rem;letter-spacing:.08em;text-transform:uppercase;color:var(--mango-deep)}
+.entry-content details{border-bottom:1px solid var(--line);padding:1em 0}
+.entry-content summary{cursor:pointer;font-weight:600;font-size:1.05rem;list-style-position:inside;min-height:44px;display:list-item}
+.entry-content details p{margin:.75em 0 0;color:var(--ink-soft)}
+.entry-content .note{font-size:.88rem;color:var(--ink-faint)}
+
+/* Listing cards (blog index, labels, search, homepage journal) */
+.post-grid{display:grid;gap:2rem 1.5rem;grid-template-columns:repeat(auto-fill,minmax(min(100%,290px),1fr))}
+.post-card .media{aspect-ratio:4/3;display:block;margin-bottom:1rem}
+.post-card time{font-size:.75rem;letter-spacing:.08em;text-transform:uppercase;color:var(--mango-deep)}
+.post-card h2,.post-card h3{font-size:1.3rem;margin:.3rem 0 .5rem}
+.post-card h2 a:hover,.post-card h3 a:hover{text-decoration:underline}
+.post-card p{color:var(--ink-soft);font-size:.95rem}
+.pager{display:flex;justify-content:space-between;gap:1rem;margin-top:3rem}
+.post-labels{max-width:var(--narrow);margin:2.5rem auto 0;display:flex;flex-wrap:wrap;gap:.5rem;list-style:none}
+.post-labels a{font-size:.8rem;padding:.45em 1em;border:1px solid var(--line);border-radius:999px;color:var(--ink-soft);text-decoration:none}
+.post-share{max-width:var(--narrow);margin:2rem auto 0;padding-top:2rem;border-top:1px solid var(--line);display:flex;flex-wrap:wrap;gap:.8rem;align-items:center}
+.empty{padding-block:2rem;color:var(--ink-soft)}
+
+/* ==========================================================================
+   6. FORMS (WhatsApp order / inquiry forms)
+   ========================================================================== */
+.form{background:var(--white);border:1px solid var(--line);border-radius:var(--r);padding:clamp(1.25rem,4vw,2.25rem);margin:1.5em 0}
+.form h3{margin-top:0}
+.form-row{display:grid;gap:1rem;grid-template-columns:minmax(0,1fr);margin-bottom:1rem}
+@media (min-width:620px){.form-row--2{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.field{display:flex;flex-direction:column;gap:.4rem}
+.field label{font-size:.82rem;font-weight:600}
+.field input,.field select,.field textarea{width:100%;min-height:48px;border:1px solid var(--line);background:var(--cream);border-radius:8px;padding:.7em .85em;color:var(--ink);font-size:16px}
+.field textarea{min-height:110px;resize:vertical}
+.field input:focus,.field select:focus,.field textarea:focus{border-color:var(--mango);outline:none}
+.form-note{font-size:.82rem;color:var(--ink-faint);margin:.8rem 0 0}
+.band--dark .form,.section--dark .form{background:rgba(250,246,236,.05);border-color:var(--line-dark)}
+.band--dark .field input,.band--dark .field select,.band--dark .field textarea{background:rgba(250,246,236,.07);border-color:var(--line-dark);color:var(--cream)}
+.band--dark .field select option{color:var(--ink)}
+.band--dark .form-note,.section--dark .form-note{color:rgba(250,246,236,.6)}
+.band--dark .form h3{color:var(--white)}
+
+/* ==========================================================================
+   7. FOOTER & FLOATING WHATSAPP
+   ========================================================================== */
+.site-footer{background:var(--forest-2);color:rgba(250,246,236,.76);padding-block:3.5rem 6rem;font-size:.93rem}
+.footer-grid{display:grid;gap:2rem;grid-template-columns:minmax(0,1fr);margin-bottom:2.5rem}
+@media (min-width:760px){.footer-grid{grid-template-columns:minmax(0,1.4fr) minmax(0,1fr) minmax(0,1fr)}}
+.site-footer .f-brand{font-family:var(--display);color:var(--white);font-size:1.35rem;margin-bottom:.5rem}
+.site-footer h2{font-family:var(--body);font-size:.74rem;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:rgba(250,246,236,.5);margin-bottom:.9rem}
+.site-footer ul{list-style:none;display:flex;flex-direction:column;gap:.2rem}
+.site-footer ul a{display:inline-block;padding-block:.35em}
+.site-footer a:hover{text-decoration:underline}
+.footer-bottom{border-top:1px solid var(--line-dark);padding-top:1.4rem;display:flex;flex-wrap:wrap;justify-content:space-between;gap:.75rem;font-size:.8rem;color:rgba(250,246,236,.5)}
+
+.wa-float{position:fixed;right:1rem;bottom:1rem;z-index:400;width:58px;height:58px;border-radius:50%;background:#25D366;color:#fff;display:flex;align-items:center;justify-content:center;box-shadow:0 8px 24px rgba(18,30,20,.35);transition:transform .25s var(--ease)}
+.wa-float:hover{transform:scale(1.07)}
+.wa-float svg{width:30px;height:30px}
+
+/* 404 */
+.not-found{padding:clamp(8rem,16vw,12rem) 0 6rem;text-align:center}
+.not-found .btn-row{justify-content:center}
+
+/* ==========================================================================
+   8. MOTION (only when JS is running; respects reduced motion)
+   ========================================================================== */
+.js .reveal{opacity:0;transform:translateY(28px);transition:opacity .9s var(--ease),transform .9s var(--ease)}
+.js .reveal.is-in{opacity:1;transform:none}
+@media (prefers-reduced-motion:reduce){
+  html{scroll-behavior:auto}
+  *,*::before,*::after{transition:none!important;animation:none!important}
+  .js .reveal{opacity:1;transform:none}
+}
+
+/* Hide Blogger's own chrome that may be injected */
+#Navbar1,.navbar,#b-navbar,.blogger-clickTrap{display:none!important}
+.widget{margin:0}
+/* Blogger adds class="section" to its section wrapper; cancel the theme's .section padding there */
+#blog-main.section{padding:0;margin:0}
+]]></b:skin>
+</head>
+
+<body expr:class='data:view.isHomepage ? &quot;is-home&quot; : &quot;is-inner&quot;'>
+<a class='skip-link' href='#main'>Skip to content</a>
+
+<!-- ======================= SVG ICONS (referenced with <use>) ======================= -->
+<svg aria-hidden='true' style='position:absolute;width:0;height:0;overflow:hidden' xmlns='http://www.w3.org/2000/svg'>
+  <symbol id='i-wa' viewBox='0 0 32 32'><path d='M16.02 3C9.4 3 4 8.37 4 15c0 2.36.68 4.56 1.86 6.42L4 29l7.77-1.82A11.9 11.9 0 0 0 16.02 27C22.63 27 28 21.63 28 15S22.63 3 16.02 3Zm6.98 16.9c-.3.83-1.68 1.6-2.32 1.68-.6.08-1.34.11-2.16-.14-.5-.15-1.14-.36-1.96-.7-3.44-1.48-5.68-4.94-5.85-5.18-.17-.23-1.4-1.86-1.4-3.55s.9-2.52 1.22-2.87c.32-.34.7-.43.93-.43.23 0 .47 0 .67.01.22.01.5-.08.79.6.3.7 1 2.42 1.09 2.6.09.17.15.38.03.61-.12.23-.18.38-.36.58-.18.2-.38.45-.54.6-.18.18-.37.37-.16.72.21.35.94 1.55 2.02 2.51 1.39 1.24 2.56 1.62 2.92 1.8.36.18.57.15.78-.09.21-.24.9-1.05 1.14-1.41.24-.36.48-.3.8-.18.33.12 2.09.99 2.45 1.17.36.18.6.27.68.42.09.15.09.85-.21 1.68Z' fill='currentColor'/></symbol>
+  <symbol id='i-mango' viewBox='0 0 32 32'><path d='M19.5 6.5c-5.8-.4-12 4.6-12.4 11.6-.3 5 3.3 8.4 7.6 8.4 6.6 0 11.3-6.4 11.3-12.2 0-4.4-2.6-7.5-6.5-7.8Z' fill='#E39A2E'/><path d='M19 6.6c.4-1.9 1.6-3.3 3.6-3.9' fill='none' stroke='#F3C876' stroke-linecap='round' stroke-width='1.6'/><path d='M20.5 5.2c2.6-.9 5.3.1 6.3 2.3-2.6.8-5 .1-6.3-2.3Z' fill='#5E8C4A'/></symbol>
+  <symbol id='i-leaf' viewBox='0 0 24 24'><path d='M5 19c0-8 5-13 15-14-1 10-6 15-14 15M5 19l7-7' fill='none' stroke='currentColor' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.6'/></symbol>
+  <symbol id='i-hand' viewBox='0 0 24 24'><path d='M7 11V6.5a1.5 1.5 0 0 1 3 0V11m0-1V4.5a1.5 1.5 0 0 1 3 0V10m0 0V5.5a1.5 1.5 0 0 1 3 0V12m0-3.5a1.5 1.5 0 0 1 3 0V14a7 7 0 0 1-7 7h-.5a6.5 6.5 0 0 1-5.3-2.7L4 15a1.5 1.5 0 0 1 2.4-1.8L7 14' fill='none' stroke='currentColor' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.6'/></symbol>
+  <symbol id='i-box' viewBox='0 0 24 24'><path d='M3 7.5 12 3l9 4.5v9L12 21l-9-4.5v-9Zm0 0L12 12m0 0 9-4.5M12 12v9' fill='none' stroke='currentColor' stroke-linejoin='round' stroke-width='1.6'/></symbol>
+  <symbol id='i-home' viewBox='0 0 24 24'><path d='M3 11 12 4l9 7M5 9.5V20h5v-6h4v6h5V9.5' fill='none' stroke='currentColor' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.6'/></symbol>
+  <symbol id='i-menu' viewBox='0 0 24 24'><path d='M4 7h16M4 12h16M4 17h16' fill='none' stroke='currentColor' stroke-linecap='round' stroke-width='1.6'/></symbol>
+  <symbol id='i-close' viewBox='0 0 24 24'><path d='M6 6l12 12M18 6 6 18' fill='none' stroke='currentColor' stroke-linecap='round' stroke-width='1.6'/></symbol>
+</svg>
+
+<!-- ======================= HEADER ======================= -->
+<header class='site-header' id='site-header'>
+  <div class='wrap'>
+    <a class='brand' expr:href='data:blog.homepageUrl' title='Ghulam Hussain Farms — Home'>
+      <svg aria-hidden='true'><use href='#i-mango'/></svg>
+      <span>Ghulam Hussain Farms</span>
+    </a>
+    <!-- Main menu: links must match the Permalinks you set on each Page (see README) -->
+    <nav aria-label='Main' class='nav'>
+      <ul>
+        <li><a href='/p/mango-varieties.html'>Mango Varieties</a></li>
+        <li><a href='/p/our-orchard.html'>Our Orchard</a></li>
+        <li><a href='/p/mango-price.html'>Prices &amp; Order</a></li>
+        <li><a href='/p/wholesale-export.html'>Wholesale &amp; Export</a></li>
+        <li><a href='/search'>Blog</a></li>
+        <li><a href='/p/contact.html'>Contact</a></li>
+      </ul>
+    </nav>
+    <a class='btn btn--primary btn--sm header-cta' href='/p/mango-price.html#order'>Order Mangoes</a>
+    <button aria-controls='mobile-nav' aria-expanded='false' aria-label='Open menu' class='menu-btn' id='menu-btn' type='button'>
+      <svg aria-hidden='true' class='i-open'><use href='#i-menu'/></svg>
+      <svg aria-hidden='true' class='i-close'><use href='#i-close'/></svg>
+    </button>
+  </div>
+</header>
+
+<div class='mobile-nav' id='mobile-nav'>
+  <nav aria-label='Mobile'>
+    <ul>
+      <li><a expr:href='data:blog.homepageUrl'>Home</a></li>
+      <li><a href='/p/mango-varieties.html'>Mango Varieties</a></li>
+      <li><a href='/p/our-orchard.html'>Our Orchard</a></li>
+      <li><a href='/p/mango-price.html'>Prices &amp; Order</a></li>
+      <li><a href='/p/wholesale-export.html'>Wholesale &amp; Export</a></li>
+      <li><a href='/search'>Blog</a></li>
+      <li><a href='/p/contact.html'>Contact</a></li>
+    </ul>
+  </nav>
+  <div class='btn-row'>
+    <a class='btn btn--primary' href='/p/mango-price.html#order'>Order Mangoes</a>
+    <a class='btn btn--outline' href='https://wa.me/923144419652' rel='noopener' target='_blank'><svg aria-hidden='true'><use href='#i-wa'/></svg>Chat on WhatsApp</a>
+  </div>
+</div>
+
+<main id='main'>
+
+<!-- ======================= HOMEPAGE (landing sections) ======================= -->
+<b:if cond='data:view.isHomepage'>
+
+  <!-- HERO -->
+  <section aria-labelledby='hero-title' class='hero'>
+    <div class='media'>
+      <!-- [IMG-hero] hero-mango-orchard-alipur-punjab.jpg -->
+      <img alt='Mango trees in the Ghulam Hussain Farms orchard, Alipur, Punjab' fetchpriority='high' height='1080' src='data:,IMG-hero' width='1920'/>
+    </div>
+    <div class='wrap hero-content'>
+      <p class='eyebrow'>Alipur · Muzaffargarh · Punjab, Pakistan</p>
+      <!-- [SEO] the only H1 on the homepage -->
+      <h1 id='hero-title'>Premium Pakistani Mangoes, Straight from Our Orchard.</h1>
+      <p class='lede'>Chaunsa, Sindhri, Anwar Ratol and Langra mangoes, grown by the Ghulam Hussain family in the fertile plains of southern Punjab and picked at the right stage.</p>
+      <div class='btn-row'>
+        <a class='btn btn--primary' href='/p/mango-price.html#order'>Order Mangoes</a>
+        <a class='btn btn--outline' href='https://wa.me/923144419652?text=Assalam%20o%20Alaikum%2C%20I%20want%20to%20order%20mangoes' rel='noopener' target='_blank'><svg aria-hidden='true'><use href='#i-wa'/></svg>WhatsApp Us</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- TRUST STRIP -->
+  <section aria-label='Why buy from us' class='trust'>
+    <div class='wrap'>
+      <ul>
+        <li><svg aria-hidden='true'><use href='#i-home'/></svg>Family-run orchard in Alipur</li>
+        <li><svg aria-hidden='true'><use href='#i-leaf'/></svg>Picked at the right maturity</li>
+        <li><svg aria-hidden='true'><use href='#i-hand'/></svg>Hand-sorted &amp; packed</li>
+        <li><svg aria-hidden='true'><use href='#i-box'/></svg>Direct from the farm</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- FEATURED VARIETIES -->
+  <section aria-labelledby='varieties-title' class='section'>
+    <div class='wrap'>
+      <div class='head head--split reveal'>
+        <div>
+          <p class='eyebrow'>Our Mangoes</p>
+          <!-- [SEO] keyword: types of mangoes in pakistan / mango varieties in pakistan -->
+          <h2 class='title' id='varieties-title'>Pakistani Mango Varieties from Our Orchard</h2>
+        </div>
+        <a class='link-arrow' href='/p/mango-varieties.html'>See all varieties &#8594;</a>
+      </div>
+      <div class='cards'>
+        <article class='card reveal'>
+          <!-- [IMG-chaunsa] chaunsa-mango.jpg -->
+          <a aria-label='Chaunsa mango' class='media' href='/p/mango-varieties.html#chaunsa'><img alt='Chaunsa mango from Alipur, Punjab' height='750' loading='lazy' src='data:,IMG-chaunsa' width='1000'/></a>
+          <div class='card-body'>
+            <span class='card-tag'>July – August</span>
+            <h3>Chaunsa</h3>
+            <p>Very sweet, smooth and fiberless. The best-loved mango of the Pakistani summer.</p>
+            <a class='link-arrow' href='/p/mango-varieties.html#chaunsa'>About Chaunsa &#8594;</a>
+          </div>
+        </article>
+        <article class='card reveal'>
+          <!-- [IMG-sindhri] sindhri-mango.jpg -->
+          <a aria-label='Sindhri mango' class='media' href='/p/mango-varieties.html#sindhri'><img alt='Sindhri mango, golden and aromatic' height='750' loading='lazy' src='data:,IMG-sindhri' width='1000'/></a>
+          <div class='card-body'>
+            <span class='card-tag'>Early season</span>
+            <h3>Sindhri</h3>
+            <p>Large, golden and fragrant, with smooth, fiberless flesh. Great for gifting.</p>
+            <a class='link-arrow' href='/p/mango-varieties.html#sindhri'>About Sindhri &#8594;</a>
+          </div>
+        </article>
+        <article class='card reveal'>
+          <!-- [IMG-anwar-ratol] anwar-ratol-mango.jpg -->
+          <a aria-label='Anwar Ratol mango' class='media' href='/p/mango-varieties.html#anwar-ratol'><img alt='Anwar Ratol mango, small and very aromatic' height='750' loading='lazy' src='data:,IMG-anwar-ratol' width='1000'/></a>
+          <div class='card-body'>
+            <span class='card-tag'>Mid season</span>
+            <h3>Anwar Ratol</h3>
+            <p>Small in size, big in aroma. Very sweet, rich and soft.</p>
+            <a class='link-arrow' href='/p/mango-varieties.html#anwar-ratol'>About Anwar Ratol &#8594;</a>
+          </div>
+        </article>
+        <article class='card reveal'>
+          <!-- [IMG-langra] langra-mango.jpg -->
+          <a aria-label='Langra mango' class='media' href='/p/mango-varieties.html#langra'><img alt='Green-skinned Langra mango' height='928' loading='lazy' src='data:,IMG-langra' width='1000'/></a>
+          <div class='card-body'>
+            <span class='card-tag'>Mid season</span>
+            <h3>Langra</h3>
+            <p>Green-skinned, juicy and tangy-sweet. A traditional favourite.</p>
+            <a class='link-arrow' href='/p/mango-varieties.html#langra'>About Langra &#8594;</a>
+          </div>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <!-- FARM STORY (short — full story lives on /p/our-orchard.html) -->
+  <section aria-labelledby='story-title' class='section section--tint'>
+    <div class='wrap split split--rev'>
+      <div class='reveal'>
+        <p class='eyebrow'>Our Orchard</p>
+        <h2 class='title' id='story-title'>A Family Mango Farm in Alipur, Punjab</h2>
+        <p>Ghulam Hussain Farms sits on the fertile plains near Head Panjnad, in Tehsil Alipur, District Muzaffargarh. Hot summers and rich river soil give our mangoes their sweetness and aroma.</p>
+        <p>Ghulam Hussain built this orchard from scratch, planting the first saplings himself. Today our family still looks after every tree by hand.</p>
+        <a class='link-arrow' href='/p/our-orchard.html'>Read our story &#8594;</a>
+      </div>
+      <div class='split-media reveal'>
+        <!-- [IMG-orchard] hand-picking-mango-orchard.jpg -->
+        <div class='media'><img alt='Hand-picking a ripe mango at Ghulam Hussain Farms, Alipur' height='1200' loading='lazy' src='data:,IMG-orchard' width='904'/></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- HOW TO ORDER -->
+  <section aria-labelledby='order-title' class='section section--forest'>
+    <div class='wrap'>
+      <div class='head reveal'>
+        <p class='eyebrow'>How to Order</p>
+        <h2 class='title' id='order-title'>Fresh Mangoes in Three Simple Steps</h2>
+      </div>
+      <ol class='steps reveal'>
+        <li><h3>Choose your mango</h3><p>Pick a variety and box size. Not sure which? Ask us what is in season right now.</p></li>
+        <li><h3>Message us on WhatsApp</h3><p>Send your order, city and quantity. We confirm today's rate and availability.</p></li>
+        <li><h3>Packed &amp; dispatched</h3><p>Your mangoes are hand-sorted, packed with care and sent from the farm.</p></li>
+      </ol>
+      <div class='btn-row reveal' style='margin-top:2rem'>
+        <a class='btn btn--primary' href='/p/mango-price.html#order'>See Prices &amp; Order</a>
+        <a class='btn btn--outline' href='https://wa.me/923144419652' rel='noopener' target='_blank'><svg aria-hidden='true'><use href='#i-wa'/></svg>0314 4419652</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- WHOLESALE & EXPORT (teaser — details on /p/wholesale-export.html) -->
+  <section aria-labelledby='b2b-title' class='section section--dark'>
+    <div class='wrap'>
+      <div class='head reveal'>
+        <p class='eyebrow'>For Businesses</p>
+        <h2 class='title' id='b2b-title'>Wholesale &amp; Export Quality Mangoes</h2>
+        <p class='lede'>We supply businesses that buy in volume, in Pakistan and abroad.</p>
+      </div>
+      <div class='duo'>
+        <div class='panel reveal'>
+          <h3>Wholesale in Pakistan</h3>
+          <p>For wholesalers, retailers, restaurants, hotels and fruit businesses.</p>
+          <a class='link-arrow' href='/p/wholesale-export.html#wholesale'>Request a quote &#8594;</a>
+        </div>
+        <div class='panel reveal'>
+          <h3>International Export</h3>
+          <p>For importers, distributors and overseas retailers sourcing Pakistani mangoes.</p>
+          <a class='link-arrow' href='/p/wholesale-export.html#export'>Start an export inquiry &#8594;</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+</b:if>
+
+<!-- ======================= 404 ======================= -->
+<b:if cond='data:view.isError'>
+  <section class='not-found'>
+    <div class='wrap wrap--narrow'>
+      <p class='eyebrow'>Error 404</p>
+      <h1 class='title' style='margin-inline:auto'>This page has gone out of season.</h1>
+      <p class='lede' style='margin-inline:auto'>The page you are looking for does not exist. Try one of these instead:</p>
+      <div class='btn-row'>
+        <a class='btn btn--primary' expr:href='data:blog.homepageUrl'>Go to Home</a>
+        <a class='btn btn--outline' href='/p/mango-varieties.html'>Mango Varieties</a>
+      </div>
+    </div>
+  </section>
+</b:if>
+
+<!-- ======================= BLOG1: posts, pages, listings, homepage journal ======================= -->
+<b:section class='blog-section' id='blog-main' maxwidgets='1' showaddelement='no'>
+  <b:widget id='Blog1' locked='true' title='Blog Posts' type='Blog' version='2' visible='true'>
+    <b:includable id='main' var='this'>
+
+      <!-- Homepage: latest 3 posts as a "From the Farm" journal -->
+      <b:if cond='data:view.isHomepage'>
+        <b:if cond='not data:posts.empty'>
+          <section aria-labelledby='journal-title' class='section section--tint'>
+            <div class='wrap'>
+              <div class='head head--split reveal'>
+                <div><p class='eyebrow'>From the Farm</p><h2 class='title' id='journal-title'>Mango Guides &amp; Orchard News</h2></div>
+                <a class='link-arrow' href='/search'>All articles &#8594;</a>
+              </div>
+              <div class='post-grid'>
+                <b:loop index='i' values='data:posts' var='post'>
+                  <b:if cond='data:i lt 3'>
+                    <b:include data='post' name='postCard'/>
+                  </b:if>
+                </b:loop>
+              </div>
+            </div>
+          </section>
+        </b:if>
+
+      <!-- Single post or static page -->
+      <b:elseif cond='data:view.isSingleItem'/>
+        <b:loop values='data:posts' var='post'>
+          <article class='post'>
+            <header class='page-hero'>
+              <div class='wrap'>
+                <nav aria-label='Breadcrumb' class='crumbs'>
+                  <a expr:href='data:blog.homepageUrl'>Home</a>
+                  <b:if cond='data:view.isPost'> / <a href='/search'>Blog</a></b:if>
+                </nav>
+                <h1><data:post.title/></h1>
+                <b:if cond='data:view.isPost'>
+                  <div class='post-meta'>
+                    <time expr:datetime='data:post.date.iso8601'><data:post.date/></time>
+                    <span>by <data:post.author.name/></span>
+                  </div>
+                </b:if>
+              </div>
+            </header>
+            <div class='wrap entry'>
+              <div class='entry-content'>
+                <data:post.body/>
+              </div>
+              <b:if cond='data:view.isPost'>
+                <b:if cond='data:post.labels'>
+                  <ul class='post-labels'>
+                    <b:loop values='data:post.labels' var='label'>
+                      <li><a expr:href='data:label.url' rel='tag'><data:label.name/></a></li>
+                    </b:loop>
+                  </ul>
+                </b:if>
+                <div class='post-share'>
+                  <a class='btn btn--wa btn--sm' expr:href='&quot;https://wa.me/?text=&quot; + data:post.title.escaped + &quot; &quot; + data:post.url.canonical' rel='noopener' target='_blank'><svg aria-hidden='true'><use href='#i-wa'/></svg>Share on WhatsApp</a>
+                  <a class='btn btn--primary btn--sm' href='/p/mango-price.html#order'>Order Mangoes</a>
+                </div>
+              </b:if>
+            </div>
+          </article>
+        </b:loop>
+
+      <!-- Blog index (/search), labels, search results, archives -->
+      <b:elseif cond='data:view.isMultipleItems'/>
+        <header class='page-hero'>
+          <div class='wrap'>
+            <p class='eyebrow'>From the Farm</p>
+            <b:if cond='data:view.isLabelSearch'>
+              <h1><data:view.search.label/></h1>
+            <b:elseif cond='data:view.search.query'/>
+              <h1>Search: <data:view.search.query/></h1>
+            <b:else/>
+              <h1>Mango Guides &amp; Orchard News</h1>
+            </b:if>
+          </div>
+        </header>
+        <div class='wrap entry'>
+          <b:if cond='data:posts.empty'>
+            <p class='empty'>No articles found yet. Check back soon, or <a class='link-arrow' expr:href='data:blog.homepageUrl'>go to the homepage</a>.</p>
+          <b:else/>
+            <div class='post-grid'>
+              <b:loop values='data:posts' var='post'>
+                <b:include data='post' name='postCard'/>
+              </b:loop>
+            </div>
+          </b:if>
+          <nav aria-label='Pagination' class='pager'>
+            <b:if cond='data:newerPageUrl'><a class='btn btn--outline btn--sm' expr:href='data:newerPageUrl'>&#8592; Newer</a><b:else/><span>&#160;</span></b:if>
+            <b:if cond='data:olderPageUrl'><a class='btn btn--outline btn--sm' expr:href='data:olderPageUrl'>Older &#8594;</a></b:if>
+          </nav>
+        </div>
+      </b:if>
+
+    </b:includable>
+
+    <!-- Card used in listings and on the homepage -->
+    <b:includable id='postCard' var='post'>
+      <article class='post-card reveal'>
+        <a class='media' expr:href='data:post.url' tabindex='-1'>
+          <b:if cond='data:post.featuredImage'>
+            <img expr:alt='data:post.title' expr:src='resizeImage(data:post.featuredImage, 640, &quot;4:3&quot;)' height='480' loading='lazy' width='640'/>
+          <b:else/>
+            <span class='sr-only'><data:post.title/></span>
+          </b:if>
+        </a>
+        <time expr:datetime='data:post.date.iso8601'><data:post.date/></time>
+        <h3><a expr:href='data:post.url'><data:post.title/></a></h3>
+        <p><data:post.snippets.short/></p>
+      </article>
+    </b:includable>
+  </b:widget>
+</b:section>
+
+<!-- ======================= HOMEPAGE FINAL CTA ======================= -->
+<b:if cond='data:view.isHomepage'>
+  <section aria-labelledby='cta-title' class='cta'>
+    <div class='media'>
+      <!-- [IMG-cta] cut-mango-final-cta.jpg -->
+      <img alt='Freshly cut Pakistani mango, ready to eat' height='1280' loading='lazy' src='data:,IMG-cta' width='1920'/>
+    </div>
+    <div class='wrap wrap--narrow cta-content reveal'>
+      <h2 id='cta-title'>Taste the Mangoes of Southern Punjab</h2>
+      <p class='lede'>Order a box for your family, or reserve next season's harvest today.</p>
+      <div class='btn-row'>
+        <a class='btn btn--primary' href='/p/mango-price.html#order'>Order Now</a>
+        <a class='btn btn--outline' href='/p/contact.html'>Visit the Farm</a>
+      </div>
+    </div>
+  </section>
+</b:if>
+
+</main>
+
+<!-- ======================= FOOTER ======================= -->
+<footer class='site-footer'>
+  <div class='wrap'>
+    <div class='footer-grid'>
+      <div>
+        <p class='f-brand'>Ghulam Hussain Farms</p>
+        <p>Premium Chaunsa, Sindhri, Anwar Ratol and Langra mangoes from our family orchard in Alipur, District Muzaffargarh, Punjab, Pakistan.</p>
+      </div>
+      <div>
+        <h2>Explore</h2>
+        <ul>
+          <li><a href='/p/mango-varieties.html'>Mango Varieties</a></li>
+          <li><a href='/p/mango-price.html'>Mango Prices &amp; Order</a></li>
+          <li><a href='/p/our-orchard.html'>Our Orchard</a></li>
+          <li><a href='/p/wholesale-export.html'>Wholesale &amp; Export</a></li>
+          <li><a href='/search'>Blog</a></li>
+        </ul>
+      </div>
+      <div>
+        <h2>Contact</h2>
+        <!-- [CONTACT] -->
+        <ul>
+          <li><a href='https://wa.me/923144419652' rel='noopener' target='_blank'>WhatsApp: 0314 4419652</a></li>
+          <li><a href='tel:+923144419652'>Call: 0314 4419652</a></li>
+          <li><a href='https://www.google.com/maps/search/?api=1&amp;query=29.3535955,71.0105049' rel='noopener' target='_blank'>Makhan Bela, near Head Panjnad, Alipur, Muzaffargarh</a></li>
+          <li><a href='/p/contact.html'>Contact page</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class='footer-bottom'>
+      <p>&#169; <span id='year'>2026</span> Ghulam Hussain Farms. All rights reserved.</p>
+      <p>Alipur, Punjab, Pakistan</p>
+    </div>
+  </div>
+</footer>
+
+<!-- [CONTACT] floating WhatsApp button -->
+<a aria-label='Chat with Ghulam Hussain Farms on WhatsApp' class='wa-float' href='https://wa.me/923144419652?text=Assalam%20o%20Alaikum%2C%20I%20am%20interested%20in%20your%20mangoes' rel='noopener' target='_blank'>
+  <svg aria-hidden='true'><use href='#i-wa'/></svg>
+</a>
+
+<script>//<![CDATA[
+(function () {
+  'use strict';
+  var WA_NUMBER = '923144419652'; /* [CONTACT] WhatsApp number used by all forms */
+  var doc = document.documentElement;
+  var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  /* Header turns solid after scrolling */
+  var header = document.getElementById('site-header');
+  function onScroll() { header.classList.toggle('is-solid', window.scrollY > 40); }
+  onScroll();
+  window.addEventListener('scroll', onScroll, { passive: true });
+
+  /* Mobile menu */
+  var btn = document.getElementById('menu-btn');
+  var mnav = document.getElementById('mobile-nav');
+  function setMenu(open) {
+    doc.classList.toggle('menu-open', open);
+    btn.setAttribute('aria-expanded', open ? 'true' : 'false');
+    btn.setAttribute('aria-label', open ? 'Close menu' : 'Open menu');
+  }
+  btn.addEventListener('click', function () { setMenu(!doc.classList.contains('menu-open')); });
+  mnav.addEventListener('click', function (e) { if (e.target.closest('a')) setMenu(false); });
+  document.addEventListener('keydown', function (e) { if (e.key === 'Escape') setMenu(false); });
+
+  /* Scroll reveal */
+  var els = document.querySelectorAll('.reveal');
+  if (reduce || !('IntersectionObserver' in window)) {
+    els.forEach(function (el) { el.classList.add('is-in'); });
+  } else {
+    var io = new IntersectionObserver(function (entries) {
+      entries.forEach(function (en) {
+        if (en.isIntersecting) { en.target.classList.add('is-in'); io.unobserve(en.target); }
+      });
+    }, { threshold: 0.12, rootMargin: '0px 0px -6% 0px' });
+    els.forEach(function (el) { io.observe(el); });
+  }
+
+  /* WhatsApp forms: any <form data-wa-form="Title"> sends its fields as a WhatsApp message */
+  document.querySelectorAll('form[data-wa-form]').forEach(function (form) {
+    form.addEventListener('submit', function (e) {
+      e.preventDefault();
+      if (!form.checkValidity()) { form.reportValidity(); return; }
+      var lines = ['*' + form.getAttribute('data-wa-form') + '* — Ghulam Hussain Farms', ''];
+      form.querySelectorAll('input, select, textarea').forEach(function (f) {
+        if (!f.name || !f.value.trim()) return;
+        var label = form.querySelector('label[for="' + f.id + '"]');
+        lines.push((label ? label.textContent.replace('*', '').trim() : f.name) + ': ' + f.value.trim());
+      });
+      window.open('https://wa.me/' + WA_NUMBER + '?text=' + encodeURIComponent(lines.join('\n')), '_blank', 'noopener');
+    });
+  });
+
+  var y = document.getElementById('year');
+  if (y) y.textContent = new Date().getFullYear();
+})();
+//]]></script>
+</body>
+</html>
