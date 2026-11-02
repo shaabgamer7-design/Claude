@@ -44,37 +44,13 @@ blogger-theme/
 2. If you see "Show desktop theme on mobile devices", choose **Desktop**. For responsive themes Blogger may grey this out, which is fine because it means the theme is already being used on phones.
 3. Check it: open your site on a phone, or add `?m=1` to the end of the URL on your computer. It should look exactly like the desktop design.
 
-## Step 3: Upload your photos and swap in the URLs
+## Step 3: Photos (already done)
 
-Every photo slot in the theme and the pages is marked with a placeholder like `data:,IMG-hero`. Until you replace it, the slot shows a green and mango gradient instead of a broken image.
+All photos already load automatically. The theme and pages point to the files in `images/` through jsDelivr, a free fast image CDN serving this public GitHub repo. You don't need to upload anything.
 
-How to get a Blogger URL for each photo:
-
-1. Go to **Posts → New post** and switch to **Compose view**.
-2. Click the **image icon → Upload from computer** and select every file in `images/`.
-3. Switch to **HTML view**. Each image appears as `<img src="https://blogger.googleusercontent.com/img/b/...">`. Copy each URL.
-4. Don't publish this post. Save it as a draft or delete it afterwards; the images stay hosted either way.
-
-Then replace each placeholder with its URL. Use Ctrl+F in **Theme → Edit HTML**, and in each page's HTML view:
-
-| Placeholder | Photo file | Used in |
-|---|---|---|
-| `data:,IMG-hero` | `hero-mango-orchard-alipur-punjab.jpg` | Theme (homepage hero) |
-| `data:,IMG-share` | `hero-mango-orchard-alipur-punjab.jpg` | Theme (WhatsApp/Facebook share preview) |
-| `data:,IMG-chaunsa` | `chaunsa-mango.jpg` | Theme + Varieties page |
-| `data:,IMG-sindhri` | `sindhri-mango.jpg` | Theme + Varieties page |
-| `data:,IMG-anwar-ratol` | `anwar-ratol-mango.jpg` | Theme + Varieties page |
-| `data:,IMG-langra` | `langra-mango.jpg` | Theme + Varieties page |
-| `data:,IMG-orchard` | `hand-picking-mango-orchard.jpg` | Theme (homepage story) |
-| `data:,IMG-cta` | `cut-mango-final-cta.jpg` | Theme (homepage final banner) |
-| `data:,IMG-lator` | `lator-mango.jpg` (low resolution; replace with a better photo when you have one) | Varieties page |
-| `data:,IMG-founder` | `ghulam-hussain-founder.jpg` | Our Orchard page |
-| `data:,IMG-young-mango` | `young-mango-on-tree-alipur.jpg` | Our Orchard page |
-| `data:,IMG-green-mangoes` | `green-mangoes-on-tree.jpg` | Our Orchard page |
-| `data:,IMG-bowl` | `fresh-harvested-mangoes-bowl.jpg` | Our Orchard page |
-| `data:,IMG-cut-mango` | `fresh-cut-mango-harvest.jpg` | Our Orchard page |
-
-Tip: in a Blogger image URL you can change `/s1600/` to `/s1200/` or `/w1200/` to get a lighter version of the photo.
+- **If you ever make the GitHub repo private, the photos will stop loading.** In that case, upload the files from `images/` to Blogger and replace each `cdn.jsdelivr.net/...` URL with the Blogger image URL. To get one: open a new post, upload the image, switch to HTML view, copy the `src`, then delete the draft.
+- **To change a photo:** Ctrl+F the file name (for example `chaunsa-mango.jpg`) in the theme or page HTML and replace that URL.
+- **Lator photo:** the current one is low resolution (299 px). Replace it with a better photo when you have one.
 
 ## Step 4: Create the pages
 

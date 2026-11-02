@@ -8,7 +8,8 @@
   ghulamhussainfarms.blogspot.com
 
   HOW TO EDIT (search this file for these markers with Ctrl+F):
-    [IMG-...]   photo slots. Replace  data:,IMG-name  with your Blogger image URL.
+    [IMG-...]   photo slots. Photos load from the project's GitHub repo via jsDelivr;
+                to use your own, replace the src URL with a Blogger image URL.
     [SEO]       titles, descriptions and keyword-bearing headings.
     [CONTACT]   phone / WhatsApp / address.
   Full instructions: README.md in the same folder.
@@ -61,7 +62,7 @@
     <meta expr:content='data:view.featuredImage' property='og:image'/>
   <b:else/>
     <!-- [IMG-share] default share image (1200x630 works best). Replace with your hero photo URL. -->
-    <meta content='data:,IMG-share' property='og:image'/>
+    <meta content='https://cdn.jsdelivr.net/gh/shaabgamer7-design/Claude@31a4d437ee4c512c73e2c924f842aeb14bfc76e1/blogger-theme/images/hero-mango-orchard-alipur-punjab.jpg' property='og:image'/>
   </b:if>
   <meta content='summary_large_image' name='twitter:card'/>
   <meta content='en_PK' property='og:locale'/>
@@ -499,7 +500,7 @@ img[src^="data:,"]{opacity:0}
   <section aria-labelledby='hero-title' class='hero'>
     <div class='media'>
       <!-- [IMG-hero] hero-mango-orchard-alipur-punjab.jpg -->
-      <img alt='Mango trees in the Ghulam Hussain Farms orchard, Alipur, Punjab' fetchpriority='high' height='1080' src='data:,IMG-hero' width='1920'/>
+      <img alt='Mango trees in the Ghulam Hussain Farms orchard, Alipur, Punjab' fetchpriority='high' height='1080' src='https://cdn.jsdelivr.net/gh/shaabgamer7-design/Claude@31a4d437ee4c512c73e2c924f842aeb14bfc76e1/blogger-theme/images/hero-mango-orchard-alipur-punjab.jpg' width='1920'/>
     </div>
     <div class='wrap hero-content'>
       <p class='eyebrow'>Alipur · Muzaffargarh · Punjab, Pakistan</p>
@@ -539,7 +540,7 @@ img[src^="data:,"]{opacity:0}
       <div class='cards'>
         <article class='card reveal'>
           <!-- [IMG-chaunsa] chaunsa-mango.jpg -->
-          <a aria-label='Chaunsa mango' class='media' href='/p/mango-varieties.html#chaunsa'><img alt='Chaunsa mango from Alipur, Punjab' height='750' loading='lazy' src='data:,IMG-chaunsa' width='1000'/></a>
+          <a aria-label='Chaunsa mango' class='media' href='/p/mango-varieties.html#chaunsa'><img alt='Chaunsa mango from Alipur, Punjab' height='750' loading='lazy' src='https://cdn.jsdelivr.net/gh/shaabgamer7-design/Claude@31a4d437ee4c512c73e2c924f842aeb14bfc76e1/blogger-theme/images/chaunsa-mango.jpg' width='1000'/></a>
           <div class='card-body'>
             <span class='card-tag'>July – August</span>
             <h3>Chaunsa</h3>
@@ -549,7 +550,7 @@ img[src^="data:,"]{opacity:0}
         </article>
         <article class='card reveal'>
           <!-- [IMG-sindhri] sindhri-mango.jpg -->
-          <a aria-label='Sindhri mango' class='media' href='/p/mango-varieties.html#sindhri'><img alt='Sindhri mango, golden and aromatic' height='750' loading='lazy' src='data:,IMG-sindhri' width='1000'/></a>
+          <a aria-label='Sindhri mango' class='media' href='/p/mango-varieties.html#sindhri'><img alt='Sindhri mango, golden and aromatic' height='750' loading='lazy' src='https://cdn.jsdelivr.net/gh/shaabgamer7-design/Claude@31a4d437ee4c512c73e2c924f842aeb14bfc76e1/blogger-theme/images/sindhri-mango.jpg' width='1000'/></a>
           <div class='card-body'>
             <span class='card-tag'>Early season</span>
             <h3>Sindhri</h3>
@@ -559,7 +560,7 @@ img[src^="data:,"]{opacity:0}
         </article>
         <article class='card reveal'>
           <!-- [IMG-anwar-ratol] anwar-ratol-mango.jpg -->
-          <a aria-label='Anwar Ratol mango' class='media' href='/p/mango-varieties.html#anwar-ratol'><img alt='Anwar Ratol mango, small and very aromatic' height='750' loading='lazy' src='data:,IMG-anwar-ratol' width='1000'/></a>
+          <a aria-label='Anwar Ratol mango' class='media' href='/p/mango-varieties.html#anwar-ratol'><img alt='Anwar Ratol mango, small and very aromatic' height='750' loading='lazy' src='https://cdn.jsdelivr.net/gh/shaabgamer7-design/Claude@31a4d437ee4c512c73e2c924f842aeb14bfc76e1/blogger-theme/images/anwar-ratol-mango.jpg' width='1000'/></a>
           <div class='card-body'>
             <span class='card-tag'>Mid season</span>
             <h3>Anwar Ratol</h3>
@@ -569,7 +570,7 @@ img[src^="data:,"]{opacity:0}
         </article>
         <article class='card reveal'>
           <!-- [IMG-langra] langra-mango.jpg -->
-          <a aria-label='Langra mango' class='media' href='/p/mango-varieties.html#langra'><img alt='Green-skinned Langra mango' height='928' loading='lazy' src='data:,IMG-langra' width='1000'/></a>
+          <a aria-label='Langra mango' class='media' href='/p/mango-varieties.html#langra'><img alt='Green-skinned Langra mango' height='928' loading='lazy' src='https://cdn.jsdelivr.net/gh/shaabgamer7-design/Claude@31a4d437ee4c512c73e2c924f842aeb14bfc76e1/blogger-theme/images/langra-mango.jpg' width='1000'/></a>
           <div class='card-body'>
             <span class='card-tag'>Mid season</span>
             <h3>Langra</h3>
@@ -593,7 +594,7 @@ img[src^="data:,"]{opacity:0}
       </div>
       <div class='split-media reveal'>
         <!-- [IMG-orchard] hand-picking-mango-orchard.jpg -->
-        <div class='media'><img alt='Hand-picking a ripe mango at Ghulam Hussain Farms, Alipur' height='1200' loading='lazy' src='data:,IMG-orchard' width='904'/></div>
+        <div class='media'><img alt='Hand-picking a ripe mango at Ghulam Hussain Farms, Alipur' height='1200' loading='lazy' src='https://cdn.jsdelivr.net/gh/shaabgamer7-design/Claude@31a4d437ee4c512c73e2c924f842aeb14bfc76e1/blogger-theme/images/hand-picking-mango-orchard.jpg' width='904'/></div>
       </div>
     </div>
   </section>
@@ -778,7 +779,7 @@ img[src^="data:,"]{opacity:0}
   <section aria-labelledby='cta-title' class='cta'>
     <div class='media'>
       <!-- [IMG-cta] cut-mango-final-cta.jpg -->
-      <img alt='Freshly cut Pakistani mango, ready to eat' height='1280' loading='lazy' src='data:,IMG-cta' width='1920'/>
+      <img alt='Freshly cut Pakistani mango, ready to eat' height='1280' loading='lazy' src='https://cdn.jsdelivr.net/gh/shaabgamer7-design/Claude@31a4d437ee4c512c73e2c924f842aeb14bfc76e1/blogger-theme/images/cut-mango-final-cta.jpg' width='1920'/>
     </div>
     <div class='wrap wrap--narrow cta-content reveal'>
       <h2 id='cta-title'>Taste the Mangoes of Southern Punjab</h2>
