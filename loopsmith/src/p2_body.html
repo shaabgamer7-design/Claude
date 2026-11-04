@@ -1,0 +1,178 @@
+
+<div class="wrap">
+  <header class="top">
+    <div class="brand">
+      <h1>Loopsmith<span class="dot" aria-hidden="true"></span></h1>
+      <p class="sub">Describe a loop or drop in a photo. Claude directs four takes, you fine-tune every layer, and the studio encodes a seamless GIF, video or sprite sheet right in your browser.</p>
+      <ul class="facts">
+        <li>Loops checked for seams</li><li>Crisp, editable text</li><li>Photo to GIF</li><li>GIF · MP4 · WebM · PNG</li><li>No watermark, no credits</li>
+      </ul>
+    </div>
+    <span class="badge" id="engineBadge">Director: <b>checking…</b></span>
+  </header>
+
+  <div class="grid">
+    <section class="bench" aria-label="Preview">
+      <div class="stage" id="stage">
+        <span class="corner tl" id="cornerTitle">TAKE</span>
+        <span class="corner tr" id="cornerSpec"></span>
+        <canvas id="view" width="480" height="480" aria-label="Animation preview. Click an object to select it, drag to move it."></canvas>
+        <div class="drop" id="dropOverlay" hidden>Drop photos to animate them</div>
+      </div>
+      <div class="transport">
+        <button class="icon-btn" id="playBtn" aria-label="Pause" title="Play or pause (Space)">❚❚</button>
+        <button class="icon-btn" id="prevBtn" aria-label="Previous frame" title="Previous frame (←)">◀︎</button>
+        <button class="icon-btn" id="nextBtn" aria-label="Next frame" title="Next frame (→)">▶︎</button>
+        <input class="scrub" id="scrub" type="range" min="0" max="999" value="0" aria-label="Scrub timeline">
+        <span class="tc" id="tc">00:00.00 · 1/60</span>
+      </div>
+      <div class="canvasrow">
+        <label for="aspect">Aspect <select id="aspect"><option value="1:1" selected>1:1</option><option value="4:5">4:5</option><option value="16:9">16:9</option><option value="9:16">9:16</option><option value="3:2">3:2</option></select></label>
+        <label for="dur">Loop <select id="dur"><option value="1.5">1.5 s</option><option value="2">2 s</option><option value="3" selected>3 s</option><option value="4">4 s</option><option value="6">6 s</option><option value="8">8 s</option></select></label>
+        <label for="fps">FPS <select id="fps"><option value="10">10</option><option value="12">12</option><option value="15">15</option><option value="20" selected>20</option><option value="25">25</option><option value="30">30</option></select></label>
+        <span class="seam" id="seam" title="Compares the last frame with the first">Checking loop…</span>
+        <span class="spacer"></span>
+        <button class="small" id="undoBtn" title="Undo (Ctrl+Z)">Undo</button>
+        <button class="small" id="redoBtn" title="Redo (Ctrl+Shift+Z)">Redo</button>
+      </div>
+      <div class="sect">
+        <div class="secthead"><h3>Takes</h3><span class="hint" id="varHint">Click a take to use it</span><button class="small push" id="remixBtn">Remix 3 more</button></div>
+        <div class="vars" id="vars"></div>
+      </div>
+      <div class="sect">
+        <div class="secthead"><h3>Frames</h3><span class="hint" id="frameHint"></span></div>
+        <div class="strip" id="strip" aria-label="Frame strip"></div>
+      </div>
+      <div class="sect">
+        <div class="secthead"><h3>History</h3><span class="hint">Saved in this browser</span></div>
+        <div class="takes" id="takes"></div>
+      </div>
+    </section>
+
+    <aside class="rail">
+      <div class="tabs" role="tablist" aria-label="Studio">
+        <button class="tab" role="tab" id="tab-create" aria-selected="true" aria-controls="pane-create">Create</button>
+        <button class="tab" role="tab" id="tab-edit" aria-selected="false" aria-controls="pane-edit">Edit</button>
+        <button class="tab" role="tab" id="tab-export" aria-selected="false" aria-controls="pane-export">Export</button>
+      </div>
+
+      <div class="pane" id="pane-create" role="tabpanel" aria-labelledby="tab-create">
+        <div class="card">
+          <h2>Prompt <small id="promptCount">0 / 600</small></h2>
+          <textarea id="prompt" maxlength="600" aria-label="Describe the animation">Glowing pink hearts floating up over a purple night, with the word “LOVE” beating in the middle</textarea>
+          <div class="photos">
+            <label class="addphoto" for="fileIn">＋ Add photos</label>
+            <input type="file" id="fileIn" accept="image/*" multiple hidden>
+            <div class="thumbs" id="thumbs"></div>
+          </div>
+          <p class="note" id="photoNote">Drop, paste or pick photos to animate them. Two or more become a slideshow.</p>
+          <div class="chips" id="photoFx" hidden></div>
+          <div class="row">
+            <button class="primary" id="goBtn">Generate 4 takes</button>
+            <button id="stopBtn" hidden>Stop</button>
+            <button id="surpriseBtn">Surprise me</button>
+            <label class="hint" for="director">Director
+              <select id="director" style="width:auto;padding:5px 8px;font-size:13px"><option value="claude">Claude</option><option value="local">Built-in (instant)</option></select>
+            </label>
+          </div>
+          <p class="note" id="status">Sample scene loaded. Describe your own loop, or start from a template below.</p>
+        </div>
+
+        <div class="card">
+          <h2>Style <small>applies instantly</small></h2>
+          <div class="chips" id="styles"></div>
+        </div>
+
+        <div class="card">
+          <h2>Captions <small>reactions &amp; memes</small></h2>
+          <div class="fields">
+            <label class="wide">Top text<input type="text" id="capTop" maxlength="60" placeholder="When the build passes"></label>
+            <label class="wide">Bottom text<input type="text" id="capBot" maxlength="60" placeholder="on the first try"></label>
+            <label>Look<select id="capStyle"><option value="meme">Classic meme</option><option value="subtitle">Subtitle box</option><option value="neon">Neon script</option><option value="bubble">Bubble</option><option value="pixel">Pixel</option></select></label>
+            <label>Motion<select id="capMotion"><option value="none">Still</option><option value="zoom">Pop in</option><option value="wave">Wave</option><option value="shake">Shake</option><option value="bounce">Bounce</option><option value="typewriter">Typewriter</option><option value="flicker">Flicker</option><option value="slide">Slide through</option></select></label>
+          </div>
+        </div>
+
+        <div class="card">
+          <h2>Templates <small id="tplCount"></small></h2>
+          <div class="chips" id="tplCats"></div>
+          <div class="tpls" id="tpls"></div>
+        </div>
+      </div>
+
+      <div class="pane" id="pane-edit" role="tabpanel" aria-labelledby="tab-edit" hidden>
+        <div class="card">
+          <h2>Refine <small>say what to change</small></h2>
+          <textarea id="refineIn" rows="2" style="min-height:64px" placeholder="Make it slower, add gold sparkles, change the text to “Ship it”"></textarea>
+          <div class="chips" id="quickRefine"></div>
+          <div class="row"><button class="primary" id="refineBtn">Apply change</button><button id="refineStop" hidden>Stop</button></div>
+          <p class="note" id="refineNote">Claude edits the current scene and keeps everything you didn't mention.</p>
+        </div>
+        <div class="card">
+          <h2>Layers <small id="layerCount"></small></h2>
+          <select id="addLayer" aria-label="Add a layer"><option value="">＋ Add a layer…</option></select>
+          <div class="layer-list" id="layerList" role="listbox" aria-label="Layers, top of the stack first"></div>
+          <p class="kbd">Top of the list draws on top. Click an object on the preview to select it; drag to move it.</p>
+        </div>
+        <div class="card">
+          <h2 id="inspTitle">Layer settings</h2>
+          <div class="insp" id="insp"></div>
+        </div>
+        <div class="card">
+          <h2>Recipe <small>scene as JSON</small></h2>
+          <div class="row">
+            <button class="small" id="saveRecipe">Save .json</button>
+            <label class="btnlike small" for="loadRecipe" style="padding:5px 10px;font-size:13px">Open .json</label>
+            <input type="file" id="loadRecipe" accept=".json,application/json" hidden>
+            <button class="small" id="copyRecipe">Copy JSON</button>
+          </div>
+          <p class="note" id="recipeNote">A recipe keeps every layer and setting. Photos stay on your device and are not included.</p>
+          <details><summary>View JSON</summary><pre id="json"></pre></details>
+        </div>
+      </div>
+
+      <div class="pane" id="pane-export" role="tabpanel" aria-labelledby="tab-export" hidden>
+        <div class="card">
+          <h2>Format</h2>
+          <div class="seg" id="fmtSeg" role="radiogroup" aria-label="Output format">
+            <button role="radio" data-fmt="gif" aria-checked="true">GIF</button>
+            <button role="radio" data-fmt="video" aria-checked="false">Video</button>
+            <button role="radio" data-fmt="sprite" aria-checked="false">Sprite sheet</button>
+            <button role="radio" data-fmt="frames" aria-checked="false">PNG frames</button>
+            <button role="radio" data-fmt="still" aria-checked="false">Still</button>
+          </div>
+          <div class="fields">
+            <label>Size (long side)<select id="xSize"><option value="240">240 px</option><option value="320">320 px</option><option value="400">400 px</option><option value="480" selected>480 px</option><option value="600">600 px</option><option value="720">720 px</option><option value="800">800 px</option><option value="1080">1080 px</option></select></label>
+            <label data-for="gif">Colors<select id="xColors"><option value="256" selected>256</option><option value="128">128</option><option value="64">64</option><option value="32">32</option><option value="16">16</option></select></label>
+            <label data-for="gif">Dithering<select id="xDither"><option value="ordered" selected>Pattern (graphics)</option><option value="diffuse">Diffusion (photos)</option><option value="none">Off</option></select></label>
+            <label data-for="gif">Max file size<select id="xCap"><option value="0" selected>No limit</option><option value="1">1 MB</option><option value="2">2 MB</option><option value="5">5 MB</option><option value="8">8 MB</option><option value="10">10 MB</option><option value="15">15 MB</option></select></label>
+            <label data-for="gif">Repeat<select id="xRepeat"><option value="forever" selected>Forever</option><option value="once">Play once</option></select></label>
+            <label data-for="video">Container<select id="vFormat"></select></label>
+            <label data-for="video">Length<select id="vLength"><option value="1">One loop</option><option value="6" selected>About 6 s</option><option value="15">About 15 s</option></select></label>
+          </div>
+          <div class="checks">
+            <label class="check" data-for="gif"><input type="checkbox" id="xOptimize" checked> Store only changed pixels (smaller file)</label>
+            <label class="check" data-for="gif"><input type="checkbox" id="xBoomerang"> Boomerang (forward, then backward)</label>
+            <label class="check" data-for="gif"><input type="checkbox" id="xBlur"> Motion blur (4 sub-frames per frame)</label>
+            <label class="check" data-for="gif sprite frames still"><input type="checkbox" id="xTransparent"> Transparent background (sticker)</label>
+            <label class="check" data-for="gif" id="matteRow" hidden>Edge color for soft edges <input type="color" id="xMatte" value="#ffffff"></label>
+          </div>
+          <p class="note" id="fmtNote"></p>
+        </div>
+        <div class="card">
+          <button class="primary big" id="renderBtn">Render GIF</button>
+          <button id="cancelBtn" hidden>Cancel</button>
+          <div class="meter" aria-hidden="true"><i id="meter"></i></div>
+          <p class="note" id="exportNote">Renders every frame at full size, then encodes it here in your browser.</p>
+          <div class="result" id="result" hidden>
+            <div class="rprev" id="rprev"></div>
+            <div class="rside">
+              <div class="stats" id="rstats"></div>
+              <button class="primary" id="saveBtn">Save file</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </aside>
+  </div>
+</div>
