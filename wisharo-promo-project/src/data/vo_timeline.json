@@ -1,0 +1,37 @@
+[
+ {
+  "id": "problem",
+  "voStart": 0.35,
+  "voEnd": 5.39
+ },
+ {
+  "id": "reveal",
+  "voStart": 5.75,
+  "voEnd": 10.142
+ },
+ {
+  "id": "pick",
+  "voStart": 10.75,
+  "voEnd": 13.177
+ },
+ {
+  "id": "background",
+  "voStart": 15.35,
+  "voEnd": 16.471
+ },
+ {
+  "id": "stickers",
+  "voStart": 18.75,
+  "voEnd": 20.995
+ },
+ {
+  "id": "language",
+  "voStart": 23.15,
+  "voEnd": 25.152
+ },
+ {
+  "id": "cta",
+  "voStart": 26.55,
+  "voEnd": 28.919
+ }
+]
