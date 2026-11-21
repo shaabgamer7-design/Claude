@@ -470,14 +470,15 @@ function analyzeRef(img){
   const kept=[];for(const s of spots){if(kept.some(k=>Math.hypot((k[0]-s[0])*W,(k[1]-s[1])*H)<5))continue;kept.push(s)}
   return{spots:kept.map(s=>s.slice(0,5)),tone:tn?{r:tr/tn,g:tg/tn,b:tb/tn}:null,aspect:W/H}}
 function copyReference(file){if(recording){toast('Stop recording first');return}if(busy){toast('Wait for the current extraction to finish');return}
-  const url=URL.createObjectURL(file),img=new Image();img.onload=()=>{toast('Studying the photo…');setTimeout(()=>{try{const a=analyzeRef(img);const keep=$('refKeep').checked;
+  const url=URL.createObjectURL(file),img0=new Image();img0.onload=()=>{const img=fitImg(img0);if(img!==img0){URL.revokeObjectURL(url);img0.src=''};toast('Studying the photo…');setTimeout(()=>{try{const a=analyzeRef(img);const keep=$('refKeep').checked;
     const W=a.aspect>=1?1600:Math.round(1600*a.aspect),H=a.aspect>=1?Math.round(1600/a.aspect):1600;const src=keep?img:makeAcneSkin('acne',{tone:a.tone,ref:img,W,H});
     const name='Copy '+(faces.filter(f=>f.list).length+1);const face=addFace({name,src,thumb:thumbOf(src),preset:'copy',list:a.spots,native:keep});switchFace(face);
     const cnt={};for(const s of a.spots)cnt[s[2]]=(cnt[s[2]]||0)+1;const parts=Object.entries(cnt).map(([t,n])=>`${n} ${TYPE_NAME[t]}${n>1?'s':''}`);
     toast(parts.length?`Copied: ${parts.join(', ')}. Add, move or delete spots as you like.`:'No clear spots found. Add them yourself by tapping.')}catch(e){console.error(e);toast('Could not read that photo')}},30)};
-  img.onerror=()=>toast('Could not open that image');img.src=url}
+  img0.onerror=()=>{URL.revokeObjectURL(url);toast('Could not open that image')};img0.src=url}
 /* ---------- faces ---------- */
 function thumbOf(src){const t=document.createElement('canvas');t.width=t.height=128;const x=t.getContext('2d');const w=src.naturalWidth||src.width,h=src.naturalHeight||src.height,s=Math.max(128/w,128/h);x.drawImage(src,(128-w*s)/2,(128-h*s)/2,w*s,h*s);return t.toDataURL('image/jpeg',.8)}
+function fitImg(img,max){max=max||2560;const w=img.naturalWidth||img.width,h=img.naturalHeight||img.height;if(!w||!h||Math.max(w,h)<=max)return img;const s=max/Math.max(w,h),c=document.createElement('canvas');c.width=Math.max(2,Math.round(w*s));c.height=Math.max(2,Math.round(h*s));c.getContext('2d').drawImage(img,0,0,c.width,c.height);return c}
 function addFace(f){faces.push(f);renderFaces();return f}
 function renderFaces(){const box=$('faces');box.innerHTML='';
   for(const f of faces){const b=document.createElement('button');b.type='button';b.className='face'+(f===curFace?' on':'');b.title=f.name;
@@ -1059,7 +1060,7 @@ $('roomT').addEventListener('change',e=>{S.room=e.target.checked;roomTone(busy||
 $('fitBtn').addEventListener('click',()=>{userCam=clampCam({x:IW/2,y:IH/2,z:1});if(!busy&&!outro)Object.assign(cam,userCam)});
 $('refInput').addEventListener('change',e=>{const f=e.target.files&&e.target.files[0];e.target.value='';if(f&&f.type.startsWith('image/'))copyReference(f)});
 $('imgInput').addEventListener('change',e=>{const fs=[...(e.target.files||[])].filter(f=>f.type.startsWith('image/'));e.target.value='';if(!fs.length)return;let first=true;
-  fs.forEach((f,i)=>{const url=URL.createObjectURL(f),img=new Image();img.onload=()=>{const auto=$('autoFind').checked,an=auto?analyzeRef(img):null;const face=addFace({name:f.name.replace(/\.[^.]+$/,'')||'My photo',src:img,thumb:thumbOf(img),spots:[],seeded:!auto,preset:auto?'copy':null,list:an?an.spots:null,native:true});if(first){first=false;switchFace(face);S.mode='add';$('modeAdd').checked=true;updateUI();toast(auto?`Found ${(an.spots||[]).length} spots on the photo. Switch to Extract and tap one.`:'Photo added. Tap the skin to place spots.')}};img.onerror=()=>toast('Could not open '+f.name);img.src=url})});
+  fs.forEach((f,i)=>{const url=URL.createObjectURL(f),img0=new Image();img0.onload=()=>{const img=fitImg(img0);if(img!==img0){URL.revokeObjectURL(url);img0.src=''};const auto=$('autoFind').checked,an=auto?analyzeRef(img):null;const face=addFace({name:f.name.replace(/\.[^.]+$/,'')||'My photo',src:img,thumb:thumbOf(img),spots:[],seeded:!auto,preset:auto?'copy':null,list:an?an.spots:null,native:true});if(first){first=false;switchFace(face);S.mode='add';$('modeAdd').checked=true;updateUI();toast(auto?`Found ${(an.spots||[]).length} spots on the photo. Switch to Extract and tap one.`:'Photo added. Tap the skin to place spots.')}};img0.onerror=()=>{URL.revokeObjectURL(url);toast('Could not open '+f.name)};img0.src=url})});
 $('clusterBtn').addEventListener('click',()=>{if(!IW||busy)return;const vw=CW/camScale(),vh=CH/camScale(),rad=Math.min(vw,vh)*.2;let placed=0,tries=0;
   while(placed<5&&tries++<80){const a=Math.random()*Math.PI*2,d=Math.sqrt(Math.random())*rad,x=cam.x+Math.cos(a)*d,y=cam.y+Math.sin(a)*d;const sz=clamp(S.size+(Math.random()-.5)*.25,0,1),r=sizeToR(sz);
     if(x<r*3||y<r*3||x>IW-r*3||y>IH-r*3)continue;if(spots.some(s=>Math.hypot(s.x-x,s.y-y)<(s.r+r)*2.6))continue;addSpot(x,y,{type:S.type==='random'?randomType():S.type,size:sz,depth:.3+Math.random()*.6});placed++}
@@ -1081,6 +1082,7 @@ stage.addEventListener('drop',e=>{const dt=new DataTransfer();for(const f of e.d
 
 /* ---------- boot ---------- */
 makeTissueTex();makeNoiseTex();
+if(window.AndroidBridge){const r4=document.getElementById('res2160');if(r4){const l4=document.querySelector('label[for=res2160]');r4.remove();if(l4)l4.remove()}}
 const fMan=addFace({name:'Man',make:()=>makeFace('man'),preset:'man'});
 const fWoman=addFace({name:'Woman',make:()=>makeFace('woman'),preset:'woman'});
 const fSkin=addFace({name:'Skin close-up',make:makeSampleSkin,preset:'skin'});
